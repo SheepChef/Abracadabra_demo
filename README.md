@@ -2,11 +2,9 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**Abracadabra(魔曰)** 是一个文本即时加密/脱敏工具，也可用于加密文件，你正在查阅其Demo示范页。本 Demo 支持PWA，完全响应式设计
+**Abracadabra(魔曰)** 是一个文本即时加密/脱敏工具，也可用于加密文件，你正在查阅其Chrome浏览器插件实现。
 
 Abracadabra 是表演魔术 (施魔法) 时所念的咒语，**魔曰** 是本项目的中文别名。
-
-C++ 版本和 Node.js 版本完全等效，密文可以互相交叉解密。
 
 设计它的初衷，是为了在中文互联网上公开合理地传输不安全的信息。
 
@@ -28,20 +26,6 @@ Telegram: [@abracadabra_cn](https://t.me/abracadabra_cn)
 - 无序，加密的文本如咒语般不可阅读。
 - 安心，密码表中已剔除敏感汉字。
 - 安全，AES256 + 三重转轮加密。
-
-## 部署说明
-
-本示范页使用 Vue 和 Vite
-
-如果需要本地编译部署，你最少需要执行两个指令：
-
-```shell
-npm install
-
-npm run build
-```
-
-本 Demo 是开发者自主设计的，还请在修改传播时保留版权信息。
 
 ## Abracadabra VS 与熊论道
 

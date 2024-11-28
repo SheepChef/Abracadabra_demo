@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "Abracadabra 魔曰",
+  "description": "安全，高效，开源的中文字符加密工具",
+  "version": "2.5.2",
+  "icons": {
+    "128": "favicon_s.png"
+  },
+  "action": {
+    "default_icon": {
+      "128": "favicon_s.png"
+    },
+    "default_popup": "index.html"
+  }
+}

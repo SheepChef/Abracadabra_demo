@@ -159,7 +159,7 @@ async function ProcessGo() {
       if (document.getElementById("KeyCard").value == "") {
         key = "ABRACADABRA";
         snackbar({
-          message: "你没有填写魔咒，自动使用默认魔咒，这不安全",
+          message: "没有填写魔咒，自动使用默认魔咒",
           autoCloseDelay: 1500
         });
       } else {
@@ -183,7 +183,7 @@ async function ProcessGo() {
       if (document.getElementById("KeyCard").value == "") {
         key = "ABRACADABRA";
         snackbar({
-          message: "你没有填写魔咒，自动使用默认魔咒，这不安全",
+          message: "没有填写魔咒，自动使用默认魔咒",
           autoCloseDelay: 1500
         });
       } else {
@@ -230,24 +230,6 @@ function copyall() {
   navigator.clipboard.writeText(window.getSelection().toString());
 }
 
-async function InstallPWA() {
-  if (window.deferredPrompt) {
-    // 显示安装提示
-    window.deferredPrompt.prompt();
-    // 等待用户响应
-    const userResponse = await window.deferredPrompt.userChoice;
-    if (userResponse.outcome === "accepted") {
-      snackbar({
-        message: "感谢你选择魔曰",
-        placement: "top-end"
-      });
-    } else {
-      console.log("PWA Install cancelled");
-    }
-    // 重置提示变量
-  }
-}
-
 onMounted(() => {
   if (isPWA()) {
     ShowPWAButton.value = false;
@@ -258,28 +240,6 @@ onBeforeUnmount(() => {});
 </script>
 
 <template>
-  <div id="MagicBadge" style="">
-    <span
-      style="
-        font-size: 3rem;
-        font-weight: bold;
-        margin: 10px 10px 10px 20px;
-        height: fit-content;
-        width: fit-content;
-      "
-      >魔曰</span
-    >
-    <span
-      style="
-        font-size: 1rem;
-        font-variant: petite-caps;
-        margin-left: 20px;
-        height: fit-content;
-        width: fit-content;
-      "
-      >Abracadabra</span
-    >
-  </div>
   <Card id="FunctionCard">
     <div
       id="MainContainer"
@@ -379,20 +339,6 @@ onBeforeUnmount(() => {});
         >
           Abracadabra V2.5.2<br /><a href="https://github.com/SheepChef/Abracadabra">Github Repo</a>
         </p>
-        <mdui-chip
-          v-if="ShowPWAButton"
-          elevated
-          icon="file_download--rounded"
-          style="
-            position: absolute;
-            bottom: 40px;
-            right: 15px;
-            background: rgba(11, 11, 11, 0.25);
-            backdrop-filter: blur(2px);
-          "
-          @click="InstallPWA"
-          >安装应用</mdui-chip
-        >
         <p
           style="
             position: relative;

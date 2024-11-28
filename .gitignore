@@ -9,8 +9,9 @@ lerna-debug.log*
 
 node_modules
 .DS_Store
-#dist
+docs
 #dist-ssr
+.vite
 coverage
 *.local
 

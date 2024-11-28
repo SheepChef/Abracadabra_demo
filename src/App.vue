@@ -14,7 +14,7 @@ onMounted(() => {});
 
 <template>
   <header><link rel="shortcut icon" href="favicon.ico" /></header>
-  <mdui-layout style="width: 100% !important; height: 100%">
+  <mdui-layout style="width: 100% !important; height: 100%; zoom: 0.9">
     <!-- 内部界面，是框架的消息部分 -->
     <mdui-layout-main class="InnerUI" fullHeight>
       <!--主要组件-->

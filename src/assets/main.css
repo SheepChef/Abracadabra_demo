@@ -2,7 +2,12 @@
   font-family: "SamsungSans";
   src: url("../font/SamsungSans-Regular.ttf");
 }
-html,
+
+html {
+  width: 351px;
+  height: 487px;
+}
+
 body {
   height: 100%;
   width: 100%;
