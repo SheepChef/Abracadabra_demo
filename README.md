@@ -14,7 +14,7 @@ Abracadabra 是表演魔术 (施魔法) 时所念的咒语，**魔曰** 是本�
 
 **在线体验**: [**Cloudflare DEMO Page**](https://abracadabra-demo.pages.dev/)
 
-**主项目**: [**dev_c Branch**](https://github.com/SheepChef/Abracadabra/)
+**主项目**: [**Abracadabra**](https://github.com/SheepChef/Abracadabra/)
 
 **Demo页源码**: [**Abracadabra-demo**](https://github.com/SheepChef/Abracadabra_demo)
 
