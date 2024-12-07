@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Abracadabra 魔曰",
   "description": "安全，高效，开源的中文字符加密工具",
-  "version": "2.5.2",
+  "version": "2.6.0",
   "icons": {
     "128": "favicon_s.png"
   },
