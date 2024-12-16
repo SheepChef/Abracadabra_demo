@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@mdui/icons": "^1.0.2",
-    "abracadabra-cn": "^2.6.0",
+    "abracadabra-cn": "^2.6.1",
     "mdui": "^2.0.3",
     "vue": "^3.3.11"
   },
