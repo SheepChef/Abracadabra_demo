@@ -3,14 +3,9 @@
   src: url("../font/SamsungSans-Regular.ttf");
 }
 
-html {
+body {
   width: 351px;
   height: 487px;
-}
-
-body {
-  height: 100%;
-  width: 100%;
   margin: 0;
   padding: 0;
   font-family: "SamsungSans", "sans-serif";

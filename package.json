@@ -1,6 +1,6 @@
 {
   "name": "abracadabra-crx",
-  "version": "2.6.9",
+  "version": "2.7.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@mdui/icons": "^1.0.2",
-    "abracadabra-cn": "^2.6.9",
+    "abracadabra-cn": "^2.7.0",
     "mdui": "^2.0.3",
     "vue": "^3.3.11"
   },

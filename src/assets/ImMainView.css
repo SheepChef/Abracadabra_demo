@@ -5,7 +5,7 @@
   top: 0px;
   height: 100%;
   overflow-x: hidden;
-  overflow-y: scroll;
+  overflow-y: hidden;
   z-index: 9;
 }
 #ImContentContainer {
