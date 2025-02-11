@@ -11,6 +11,7 @@ import { Abracadabra } from "abracadabra-cn";
 
 const InputMode = ref("TEXT");
 const OutputMode = ref("TEXT");
+const EncMode = ref("Next");
 const ShowPWAButton = ref(true);
 const ForceEnc = ref(false);
 const ForceDec = ref(false);
@@ -116,23 +117,30 @@ const isPWA = () => {
 };
 
 function ControlEnc() {
-  if (document.getElementById("ForceEnc").checked == true) {
-    document.getElementById("ForceDec").disabled = true;
-    document.getElementById("ForceDec").checked = false;
-    ForceEnc.value = true;
-    ForceDec.value = false;
-  } else if (document.getElementById("ForceDec").checked == true) {
+  if (EncMode.value == "Next") {
     document.getElementById("ForceEnc").disabled = true;
     document.getElementById("Forceq").disabled = true;
-    document.getElementById("ForceEnc").checked = false;
-    ForceEnc.value = false;
-    ForceDec.value = true;
+    document.getElementById("ForceDec").disabled = true;
+    return;
   } else {
-    document.getElementById("ForceDec").disabled = false;
-    document.getElementById("ForceEnc").disabled = false;
-    document.getElementById("Forceq").disabled = false;
-    ForceEnc.value = false;
-    ForceDec.value = false;
+    if (document.getElementById("ForceEnc").checked == true) {
+      document.getElementById("ForceDec").disabled = true;
+      document.getElementById("ForceDec").checked = false;
+      ForceEnc.value = true;
+      ForceDec.value = false;
+    } else if (document.getElementById("ForceDec").checked == true) {
+      document.getElementById("ForceEnc").disabled = true;
+      document.getElementById("Forceq").disabled = true;
+      document.getElementById("ForceEnc").checked = false;
+      ForceEnc.value = false;
+      ForceDec.value = true;
+    } else {
+      document.getElementById("ForceDec").disabled = false;
+      document.getElementById("ForceEnc").disabled = false;
+      document.getElementById("Forceq").disabled = false;
+      ForceEnc.value = false;
+      ForceDec.value = false;
+    }
   }
 }
 function ControlEncq() {
@@ -141,6 +149,19 @@ function ControlEncq() {
   } else {
     ForceEncq.value = false;
   }
+}
+
+async function Switch() {
+  if (EncMode.value == "Normal") {
+    document.getElementById("NormalControlBar").style.display = "none";
+    document.getElementById("NextControlBar").style.display = "grid";
+    EncMode.value = "Next";
+  } else if (EncMode.value == "Next") {
+    document.getElementById("NormalControlBar").style.display = "block";
+    document.getElementById("NextControlBar").style.display = "none";
+    EncMode.value = "Normal";
+  }
+  ControlEnc();
 }
 
 async function KeyEnter() {
@@ -222,6 +243,125 @@ async function ProcessGo() {
   }
 }
 
+async function ProcessEncNext() {
+  let Abra = new Abracadabra(InputMode.value, OutputMode.value);
+  let key;
+  try {
+    if (InputMode.value == "TEXT") {
+      if (document.getElementById("InputCard").value == "") {
+        return;
+      }
+      if (document.getElementById("KeyCard").value == "") {
+        key = "ABRACADABRA";
+        snackbar({
+          message: "没有填写魔咒，自动使用默认魔咒",
+          autoCloseDelay: 1500
+        });
+      } else {
+        key = document.getElementById("KeyCard").value;
+      }
+      Abra.Input_Next(
+        document.getElementById("InputCard").value,
+        "ENCRYPT",
+        key,
+        true,
+        parseInt(document.querySelector("#Randomness").value)
+      );
+    } else if (InputMode.value == "UINT8") {
+      if (window.inputfile == undefined || window.inputfile == null) {
+        return;
+      }
+      if (document.getElementById("KeyCard").value == "") {
+        key = "ABRACADABRA";
+        snackbar({
+          message: "没有填写魔咒，自动使用默认魔咒",
+          autoCloseDelay: 1500
+        });
+      } else {
+        key = document.getElementById("KeyCard").value;
+      }
+      let FileU = await fileToUint8Array(window.inputfile);
+      Abra.Input_Next(
+        FileU,
+        "ENCRYPT",
+        key,
+        true,
+        parseInt(document.querySelector("#Randomness").value)
+      );
+    }
+    if (OutputMode.value == "TEXT") {
+      document.getElementById("OutputText").value = Abra.Output();
+    } else if (OutputMode.value == "UINT8") {
+      let OutUint = Abra.Output();
+      let FileOut = uint8ArrayToFile(OutUint, "Abracadabra_Result", "application/octet-stream");
+
+      let aTag = document.createElement("a"); //创建一个a标签
+      aTag.download = FileOut.name;
+      let href = URL.createObjectURL(FileOut); //获取url
+      aTag.href = href;
+      aTag.click();
+      URL.revokeObjectURL(href); //释放url
+    }
+  } catch (err) {
+    snackbar({
+      message: "发生错误, " + err.toString()
+    });
+  }
+}
+
+async function ProcessDecNext() {
+  let Abra = new Abracadabra(InputMode.value, OutputMode.value);
+  let key;
+  try {
+    if (InputMode.value == "TEXT") {
+      if (document.getElementById("InputCard").value == "") {
+        return;
+      }
+      if (document.getElementById("KeyCard").value == "") {
+        key = "ABRACADABRA";
+        snackbar({
+          message: "没有填写魔咒，自动使用默认魔咒",
+          autoCloseDelay: 1500
+        });
+      } else {
+        key = document.getElementById("KeyCard").value;
+      }
+      Abra.Input_Next(document.getElementById("InputCard").value, "DECRYPT", key);
+    } else if (InputMode.value == "UINT8") {
+      if (window.inputfile == undefined || window.inputfile == null) {
+        return;
+      }
+      if (document.getElementById("KeyCard").value == "") {
+        key = "ABRACADABRA";
+        snackbar({
+          message: "没有填写魔咒，自动使用默认魔咒",
+          autoCloseDelay: 1500
+        });
+      } else {
+        key = document.getElementById("KeyCard").value;
+      }
+      let FileU = await fileToUint8Array(window.inputfile);
+      Abra.Input_Next(FileU, "DECRYPT", key);
+    }
+    if (OutputMode.value == "TEXT") {
+      document.getElementById("OutputText").value = Abra.Output();
+    } else if (OutputMode.value == "UINT8") {
+      let OutUint = Abra.Output();
+      let FileOut = uint8ArrayToFile(OutUint, "Abracadabra_Result", "application/octet-stream");
+
+      let aTag = document.createElement("a"); //创建一个a标签
+      aTag.download = FileOut.name;
+      let href = URL.createObjectURL(FileOut); //获取url
+      aTag.href = href;
+      aTag.click();
+      URL.revokeObjectURL(href); //释放url
+    }
+  } catch (err) {
+    snackbar({
+      message: "发生错误, " + err.toString()
+    });
+  }
+}
 function copyall() {
   if (document.getElementById("OutputText").value == "") {
     return;
@@ -235,6 +375,21 @@ onMounted(() => {
     ShowPWAButton.value = false;
   }
   ControlEnc();
+  const slider = document.querySelector("#Randomness");
+  slider.labelFormatter = (value) => {
+    if (value == 0) {
+      return "长句优先";
+    } else if (value == 25) {
+      return "稍随机";
+    } else if (value == 50) {
+      return "适中";
+    } else if (value == 75) {
+      return "较随机";
+    } else if (value == 100) {
+      return "完全随机";
+    }
+    return "";
+  };
 });
 onBeforeUnmount(() => {});
 </script>
@@ -283,13 +438,78 @@ onBeforeUnmount(() => {});
           placeholder="将一切雪藏的魔咒"
           style="grid-column: span 3; align-self: center; width: 360px"
         ></mdui-text-field>
-        <mdui-button
-          icon="arrow_downward--rounded"
-          @click="ProcessGo"
-          full-width
-          style="align-self: center; top: -4px"
-          >吟唱你的魔法</mdui-button
+        <div id="NormalControlBar" style="align-self: center; display: none">
+          <mdui-button
+            icon="arrow_downward--rounded"
+            @click="ProcessGo"
+            style="align-self: center; top: -4px; width: 230px; margin-right: 6px"
+            >吟唱你的魔法</mdui-button
+          >
+          <mdui-button
+            variant="elevated"
+            icon="auto_awesome--rounded"
+            @click="Switch"
+            style="align-self: center; top: -4px; width: 120px; border: solid 2px white"
+            >文言仿真</mdui-button
+          >
+        </div>
+        <div
+          id="NextControlBar"
+          style="align-self: center; display: grid; grid-template-columns: 235px 124px"
         >
+          <mdui-button
+            icon="arrow_downward--rounded"
+            @click="ProcessGo"
+            style="align-self: center; top: -4px; width: 230px; margin-right: 6px; display: none"
+            >吟唱你的魔法</mdui-button
+          >
+          <div style="display: grid; grid-template-rows: 40px 33px">
+            <div
+              style="
+                width: fit-content;
+                align-self: center;
+                justify-self: center;
+                margin-left: -10px;
+              "
+            >
+              <mdui-chip
+                icon="keyboard_double_arrow_down--rounded"
+                @click="ProcessEncNext"
+                style="align-self: center; width: 105px; text-align: center; margin-right: 5px"
+                >加密</mdui-chip
+              >
+              <mdui-chip
+                icon="keyboard_double_arrow_down--rounded"
+                @click="ProcessDecNext"
+                style="align-self: center; width: 105px; text-align: center"
+                >解密</mdui-chip
+              >
+            </div>
+            <mdui-slider
+              id="Randomness"
+              tickmarks
+              step="25"
+              value="50"
+              min="0"
+              max="100"
+              style="
+                background: #0000003b;
+                padding: 0 25px;
+                width: 215px;
+                margin-left: 5px;
+                border-radius: 25px;
+                height: 35px;
+              "
+            ></mdui-slider>
+          </div>
+          <mdui-button
+            variant="elevated"
+            icon="auto_fix_off--rounded"
+            @click="Switch"
+            style="align-self: center; top: -4px; width: 120px; border: solid 2px white"
+            >传统加密</mdui-button
+          >
+        </div>
       </div>
       <mdui-text-field
         v-if="OutputMode == 'TEXT'"
@@ -337,7 +557,7 @@ onBeforeUnmount(() => {});
             margin: 0px;
           "
         >
-          Abracadabra V2.7.0<br /><a href="https://github.com/SheepChef/Abracadabra">Github Repo</a>
+          Abracadabra V3.0.1<br /><a href="https://github.com/SheepChef/Abracadabra">Github Repo</a>
         </p>
         <p
           style="
