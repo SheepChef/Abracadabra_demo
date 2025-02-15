@@ -487,7 +487,6 @@ onBeforeUnmount(() => {});
             </div>
             <mdui-slider
               id="Randomness"
-              tickmarks
               step="25"
               value="50"
               min="0"
@@ -557,7 +556,7 @@ onBeforeUnmount(() => {});
             margin: 0px;
           "
         >
-          Abracadabra V3.0.1<br /><a href="https://github.com/SheepChef/Abracadabra">Github Repo</a>
+          Abracadabra V3.0.2<br /><a href="https://github.com/SheepChef/Abracadabra">Github Repo</a>
         </p>
         <p
           style="
