@@ -16,6 +16,8 @@ export default defineConfig({
         supportURL:"https://github.com/SheepChef/Abracadabra",
         author:"SheepChef",
         icon64:"https://abracadabra-demo.pages.dev/assets/favicon.png",
+        namespace:"shef.cc",
+        license:"GPLv3",
         match: [
           'https://tieba.baidu.com/*',
           'https://www.bilibili.com/video/*'
