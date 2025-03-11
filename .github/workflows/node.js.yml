@@ -5,9 +5,9 @@ name: 自动集成
 
 on:
   push:
-    branches: [ "main", "dev_nodejs" ]
+    branches: [ "userscript" ]
   pull_request:
-    branches: [ "main", "dev_nodejs" ]
+    branches: [ "userscript" ]
 
 jobs:
   Build:
