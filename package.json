@@ -1,32 +1,22 @@
 {
-  "name": "abracadabra-nodedemo",
+  "name": "abracadabra",
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "main":"./src/index.js",
   "scripts": {
     "dev": "vite",
-    "build": "vite build --outDir ./docs",
+    "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
     "format": "prettier --write src/"
   },
   "dependencies": {
-    "@mdui/icons": "^1.0.2",
-    "abracadabra-cn": "^3.0.9",
-    "mdui": "^2.0.3",
-    "vue": "^3.3.11"
+    "abracadabra-cn": "^3.0.9"
   },
   "devDependencies": {
-    "@rushstack/eslint-patch": "^1.3.3",
-    "@vitejs/plugin-vue": "^5.0.5",
-    "@vue/eslint-config-prettier": "^9.0.0",
-    "eslint": "^9.5.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-vue": "^9.17.0",
-    "prettier": "^3.2.4",
     "terser": "^5.31.1",
     "vite": "^5.0.10",
-    "vite-plugin-compression": "^0.5.1",
-    "vite-plugin-pwa": "^0.21.0"
+    "vite-userscript-plugin": "^1.11.0"
   }
 }
