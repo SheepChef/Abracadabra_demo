@@ -164,11 +164,6 @@ async function Switch() {
   ControlEnc();
 }
 
-async function KeyEnter() {
-  document.getElementById("KeyCard").blur();
-  await ProcessGo();
-}
-
 async function ProcessGo() {
   let Abra = new Abracadabra(InputMode.value, OutputMode.value);
   let key;
@@ -430,7 +425,6 @@ onBeforeUnmount(() => {});
       </Card>
       <div id="controlBar" style="grid-area: 2; display: grid; grid-template-columns: 360px">
         <mdui-text-field
-          @keydown.enter="KeyEnter"
           id="KeyCard"
           variant="outlined"
           rows="1"
@@ -556,7 +550,9 @@ onBeforeUnmount(() => {});
             margin: 0px;
           "
         >
-          Abracadabra V3.0.10<br /><a href="https://github.com/SheepChef/Abracadabra">Github Repo</a>
+          Abracadabra V3.0.11<br /><a href="https://github.com/SheepChef/Abracadabra"
+            >Github Repo</a
+          >
         </p>
         <p
           style="
