@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "main":"./src/index.js",
+  "main": "./src/index.js",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -12,7 +12,7 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
-    "abracadabra-cn": "^3.0.10"
+    "abracadabra-cn": "^3.0.11"
   },
   "devDependencies": {
     "terser": "^5.31.1",
