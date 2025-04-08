@@ -1,8 +1,8 @@
 # Abracadabra：魔曰
 
-![License](https://img.shields.io/github/license/SheepChef/Abracadabra?color=yellow)
+[<img src="https://img.shields.io/badge/license-AIPL%201.1-yellow"/>](LICENSE.md)
 
-**Abracadabra(魔曰)** 是一个文本即时加密工具，也可用于加密文件，你正在查阅其Demo示范页。本 Demo 支持PWA，完全响应式设计。
+**Abracadabra(魔曰)** 是一个文本即时加密工具，也可用于加密文件，你正在查阅其 Demo 示范页。本 Demo 支持 PWA，完全响应式设计。
 
 Abracadabra 是表演魔术 (施魔法) 时所念的咒语，**魔曰** 是本项目的中文别名。
 
