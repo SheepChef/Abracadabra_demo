@@ -1,6 +1,6 @@
 # Abracadabra：魔曰
 
-![License](https://img.shields.io/github/license/SheepChef/Abracadabra?color=yellow)
+[<img src="https://img.shields.io/badge/license-AIPL%201.1-yellow"/>](LICENSE.md)
 
 **Abracadabra(魔曰)** 是一个文本即时加密工具，也可用于加密文件，你正在查阅其Chrome浏览器插件实现。
 
