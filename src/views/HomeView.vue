@@ -1,6 +1,6 @@
 <script setup>
 import Card from "@/components/MdCard.vue";
-import { ref, onMounted, onBeforeUnmount, onUnmounted, watch } from "vue";
+import { ref, onMounted, onBeforeUnmount, onUnmounted, watch, nextTick } from "vue";
 import "@mdui/icons/autorenew--rounded.js";
 import "@mdui/icons/do-not-disturb-alt--rounded.js";
 import "@mdui/icons/explore.js";
@@ -16,6 +16,9 @@ const ShowPWAButton = ref(true);
 const ForceEnc = ref(false);
 const ForceDec = ref(false);
 const ForceEncq = ref(false);
+const ForcePian = ref(false);
+const ForceLogi = ref(false);
+const ForceNoMark = ref(false);
 const FileCardColor = ref("#5b6169");
 var dropzoneActive = false;
 var filess = ref(new Array());
@@ -118,10 +121,22 @@ const isPWA = () => {
 
 function ControlEnc() {
   if (EncMode.value == "Next") {
-    document.getElementById("ForceEnc").disabled = true;
-    document.getElementById("Forceq").disabled = true;
-    document.getElementById("ForceDec").disabled = true;
-    return;
+    if (document.getElementById("ForcePian").checked == true) {
+      document.getElementById("ForceLogi").disabled = true;
+      document.getElementById("ForceLogi").checked = false;
+      ForcePian.value = true;
+      ForceLogi.value = false;
+    } else if (document.getElementById("ForceLogi").checked == true) {
+      document.getElementById("ForcePian").disabled = true;
+      document.getElementById("ForcePian").checked = false;
+      ForcePian.value = false;
+      ForceLogi.value = true;
+    } else {
+      document.getElementById("ForcePian").disabled = false;
+      document.getElementById("ForceLogi").disabled = false;
+      ForceLogi.value = false;
+      ForcePian.value = false;
+    }
   } else {
     if (document.getElementById("ForceEnc").checked == true) {
       document.getElementById("ForceDec").disabled = true;
@@ -150,6 +165,13 @@ function ControlEncq() {
     ForceEncq.value = false;
   }
 }
+function ControlNoMark() {
+  if (document.getElementById("ForceNoMark").checked == true) {
+    ForceNoMark.value = true;
+  } else {
+    ForceNoMark.value = false;
+  }
+}
 
 async function Switch() {
   if (EncMode.value == "Normal") {
@@ -161,6 +183,7 @@ async function Switch() {
     document.getElementById("NextControlBar").style.display = "none";
     EncMode.value = "Normal";
   }
+  await nextTick();
   ControlEnc();
 }
 
@@ -259,8 +282,10 @@ async function ProcessEncNext() {
         document.getElementById("InputCard").value,
         "ENCRYPT",
         key,
-        true,
-        parseInt(document.querySelector("#Randomness").value)
+        !ForceNoMark.value,
+        parseInt(document.querySelector("#Randomness").value),
+        ForcePian.value,
+        ForceLogi.value
       );
     } else if (InputMode.value == "UINT8") {
       if (window.inputfile == undefined || window.inputfile == null) {
@@ -280,8 +305,10 @@ async function ProcessEncNext() {
         FileU,
         "ENCRYPT",
         key,
-        true,
-        parseInt(document.querySelector("#Randomness").value)
+        !ForceNoMark.value,
+        parseInt(document.querySelector("#Randomness").value),
+        ForcePian.value,
+        ForceLogi.value
       );
     }
     if (OutputMode.value == "TEXT") {
@@ -550,9 +577,7 @@ onBeforeUnmount(() => {});
             margin: 0px;
           "
         >
-          Abracadabra V3.0.11<br /><a href="https://github.com/SheepChef/Abracadabra"
-            >Github Repo</a
-          >
+          Abracadabra V3.1.0<br /><a href="https://github.com/SheepChef/Abracadabra">Github Repo</a>
         </p>
         <p
           style="
@@ -578,24 +603,77 @@ onBeforeUnmount(() => {});
   </Card>
   <Card id="FloatCard">
     <div id="CryptControl">
-      <span style="align-self: center; justify-self: right; margin-right: 0px">雪藏话语</span>
+      <span
+        v-if="EncMode == 'Next'"
+        style="align-self: center; justify-self: right; margin-right: 0px"
+        >骈文格律</span
+      >
       <mdui-switch
+        v-if="EncMode == 'Next'"
+        id="ForcePian"
+        style="align-self: center; justify-self: left"
+        unchecked-icon="hdr_auto--rounded"
+        checked-icon="auto_awesome--rounded"
+        @change="ControlEnc"
+      ></mdui-switch>
+      <span
+        v-if="EncMode == 'Next'"
+        style="align-self: center; justify-self: right; margin-right: 0px"
+        >逻辑优先</span
+      >
+      <mdui-switch
+        v-if="EncMode == 'Next'"
+        id="ForceLogi"
+        style="align-self: center; justify-self: left"
+        unchecked-icon="hdr_auto--rounded"
+        checked-icon="auto_awesome--rounded"
+        @change="ControlEnc"
+      ></mdui-switch>
+      <span
+        v-if="EncMode == 'Next'"
+        style="align-self: center; justify-self: right; margin-right: 0px"
+        >去除标点</span
+      >
+      <mdui-switch
+        v-if="EncMode == 'Next'"
+        id="ForceNoMark"
+        checked-icon="auto_awesome--rounded"
+        style="align-self: center; justify-self: left"
+        @change="ControlNoMark"
+      ></mdui-switch>
+      <span
+        v-if="EncMode == 'Normal'"
+        style="align-self: center; justify-self: right; margin-right: 0px"
+        >雪藏话语</span
+      >
+      <mdui-switch
+        v-if="EncMode == 'Normal'"
         id="ForceEnc"
         style="align-self: center; justify-self: left"
         unchecked-icon="hdr_auto--rounded"
         checked-icon="auto_awesome--rounded"
         @change="ControlEnc"
       ></mdui-switch>
-      <span style="align-self: center; justify-self: right; margin-right: 0px">探求真意</span>
+      <span
+        v-if="EncMode == 'Normal'"
+        style="align-self: center; justify-self: right; margin-right: 0px"
+        >探求真意</span
+      >
       <mdui-switch
+        v-if="EncMode == 'Normal'"
         id="ForceDec"
         style="align-self: center; justify-self: left"
         unchecked-icon="hdr_auto--rounded"
         checked-icon="auto_awesome--rounded"
         @change="ControlEnc"
       ></mdui-switch>
-      <span style="align-self: center; justify-self: right; margin-right: 0px">去除标志</span>
+      <span
+        v-if="EncMode == 'Normal'"
+        style="align-self: center; justify-self: right; margin-right: 0px"
+        >去除标志</span
+      >
       <mdui-switch
+        v-if="EncMode == 'Normal'"
         id="Forceq"
         checked-icon="auto_awesome--rounded"
         style="align-self: center; justify-self: left"
