@@ -11,7 +11,7 @@ export default defineConfig({
       header: {
         name: "Abracadabra 魔曰",
         description: "文本加密工具组件，由 Abracadabra 项目支持。",
-        version: "v3.1.2",
+        version: "v3.1.3",
         "run-at": "document-idle",
         supportURL: "https://github.com/SheepChef/Abracadabra",
         author: "SheepChef",
