@@ -10,8 +10,8 @@ export default defineConfig({
       entry: "src/index.js",
       header: {
         name: "Abracadabra 魔曰",
-        description: "文本防和谐工具组件，由 Abracadabra 项目支持。",
-        version: "v3.1.1",
+        description: "文本加密工具组件，由 Abracadabra 项目支持。",
+        version: "v3.1.2",
         "run-at": "document-idle",
         supportURL: "https://github.com/SheepChef/Abracadabra",
         author: "SheepChef",
