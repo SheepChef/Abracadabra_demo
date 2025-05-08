@@ -4,9 +4,36 @@ import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import viteCompression from "vite-plugin-compression";
 import manifest from "./manifest.json" assert { type: "json" }; // Node >=17
+import terser from "@rollup/plugin-terser";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  build: {
+    minify: "terser",
+    cssMinify: "esbuild",
+    rollupOptions: {
+      plugins: [
+        terser({
+          format: {
+            // 取消代码注释
+            comments: false
+          },
+
+          mangle: {
+            keep_classnames: false,
+            reserved: []
+          }
+        })
+      ],
+      output: {
+        manualChunks: (id) => {
+          if (id.includes("node_modules")) {
+            return "deps";
+          }
+        }
+      }
+    }
+  },
   plugins: [
     vue({
       template: {

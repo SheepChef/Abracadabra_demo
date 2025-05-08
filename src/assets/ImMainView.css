@@ -41,7 +41,7 @@
 body {
   background: url("./bg.webp");
   background-size: cover;
-  background-position: -480px;
+  background-position: -400px;
 }
 #FunctionCard {
   width: 390px;
@@ -53,7 +53,7 @@ body {
   align-self: center;
   justify-self: center;
   background: rgb(10 2 21 / 60%);
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur(8px);
 }
 #FloatCard {
   width: 390px;
@@ -64,7 +64,7 @@ body {
   z-index: 20;
   top: 0px;
   background: rgb(10 2 21 / 85%);
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur(8px);
 }
 #CryptControl {
   display: grid;

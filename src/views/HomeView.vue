@@ -1,11 +1,18 @@
 <script setup>
 import Card from "@/components/MdCard.vue";
 import { ref, onMounted, onBeforeUnmount, onUnmounted, watch, nextTick } from "vue";
-import "@mdui/icons/autorenew--rounded.js";
+/*import "@mdui/icons/autorenew--rounded.js";
 import "@mdui/icons/do-not-disturb-alt--rounded.js";
 import "@mdui/icons/explore.js";
-import "@mdui/icons/done--rounded.js";
-import { snackbar } from "mdui/functions/snackbar.js";
+import "@mdui/icons/done--rounded.js";*/
+
+import { snackbar as Snbar } from "mdui/functions/snackbar.js";
+import "mdui/components/switch.js";
+import "mdui/components/card.js";
+import "mdui/components/chip.js";
+import "mdui/components/button.js";
+import "mdui/components/text-field.js";
+import "mdui/components/slider.js";
 
 import { Abracadabra } from "abracadabra-cn";
 
@@ -24,6 +31,14 @@ var dropzoneActive = false;
 var filess = ref(new Array());
 const INFILE = ref(null);
 const FILENAME = ref("");
+
+function snackbar(obj) {
+  let Bar = document.getElementById("InfoBar");
+  let mes = obj.message;
+
+  Bar.innerText = mes;
+  Bar.open = true;
+}
 
 watch(
   () => filess.value[0],
@@ -545,7 +560,7 @@ onBeforeUnmount(() => {});
         icon="content_copy--rounded"
         style="
           position: absolute;
-          bottom: 95px;
+          bottom: 103px;
           right: 22px;
           background: rgb(11 11 11 / 25%);
           backdrop-filter: blur(2px);
@@ -682,5 +697,6 @@ onBeforeUnmount(() => {});
     </div>
   </Card>
   <div id="PositionOccupie"></div>
+  <mdui-snackbar auto-close-delay="1500" id="InfoBar"></mdui-snackbar>
 </template>
 <style scoped></style>
