@@ -635,18 +635,17 @@ onBeforeUnmount(() => {});
           Abracadabra V3.1.3<br /><a href="https://github.com/SheepChef/Abracadabra">Github Repo</a>
         </p>
         <mdui-chip
-          v-if="ShowPWAButton"
           elevated
-          icon="file_download--rounded"
+          icon="devices--rounded"
           style="
             position: absolute;
             bottom: 40px;
             right: 15px;
-            background: rgba(11, 11, 11, 0.25);
-            backdrop-filter: blur(2px);
+            background: transparent;
+            backdrop-filter: blur(1px);
+            pointer-events: none;
           "
-          @click="InstallPWA"
-          >安装应用</mdui-chip
+          >离线包</mdui-chip
         >
         <p
           style="

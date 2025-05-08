@@ -31,3 +31,7 @@ vscode
 .prettierignore
 .prettierrc.json
 dev-dist
+docs
+.docs/*
+unpackage
+manifest.json
