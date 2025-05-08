@@ -632,21 +632,8 @@ onBeforeUnmount(() => {});
             margin: 0px;
           "
         >
-          Abracadabra V3.1.3<br /><a href="https://github.com/SheepChef/Abracadabra">Github Repo</a>
+          Abracadabra V3.1.3<br /><a style="color: #637eff">Offline Build</a>
         </p>
-        <mdui-chip
-          elevated
-          icon="devices--rounded"
-          style="
-            position: absolute;
-            bottom: 40px;
-            right: 15px;
-            background: transparent;
-            backdrop-filter: blur(1px);
-            pointer-events: none;
-          "
-          >离线包</mdui-chip
-        >
         <p
           style="
             position: relative;
