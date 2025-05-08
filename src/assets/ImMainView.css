@@ -42,7 +42,7 @@
   body {
     background: url("./bg.webp");
     background-size: cover;
-    background-position: -480px;
+    background-position: -400px;
     zoom: 80%;
   }
 }
@@ -51,7 +51,7 @@
   body {
     background: url("./bg.webp");
     background-size: cover;
-    background-position: -480px;
+    background-position: -400px;
     zoom: 90%;
   }
 }
@@ -60,7 +60,7 @@
   body {
     background: url("./bg.webp");
     background-size: cover;
-    background-position: -480px;
+    background-position: -400px;
   }
   #MagicBadge {
     position: absolute;
@@ -80,7 +80,7 @@
     align-self: center;
     justify-self: center;
     background: rgb(10 2 21 / 60%);
-    backdrop-filter: blur(6px);
+    backdrop-filter: blur(8px);
     box-shadow: 0px 6px 20px 0px rgb(0 0 0 / 66%);
   }
   #FloatCard {
@@ -92,7 +92,7 @@
     z-index: -1;
     top: 140px;
     background: rgb(10 2 21 / 60%);
-    backdrop-filter: blur(6px);
+    backdrop-filter: blur(8px);
     box-shadow: 0px 6px 20px 0px rgb(0 0 0 / 66%);
   }
   #CryptControl {
@@ -146,7 +146,7 @@
     left: calc(80% - 360px);
     top: 70px;
     padding: 20px 15px 15px;
-    backdrop-filter: blur(6px);
+    backdrop-filter: blur(8px);
     box-shadow: 0px 6px 20px 0px rgb(0 0 0 / 66%);
   }
   #FloatCard {
@@ -157,7 +157,7 @@
     left: calc(80% - 520px);
     top: -80px;
     background: rgb(10 2 21 / 60%);
-    backdrop-filter: blur(6px);
+    backdrop-filter: blur(8px);
     box-shadow: 0px 6px 20px 0px rgb(0 0 0 / 66%);
   }
   #CryptControl {

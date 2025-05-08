@@ -1,12 +1,45 @@
 import { fileURLToPath, URL } from "node:url";
 
+import fs from "fs";
+import path from "path";
+
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 import vue from "@vitejs/plugin-vue";
 import viteCompression from "vite-plugin-compression";
+import terser from "@rollup/plugin-terser";
+
+let configStore;
+let outDir = "";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  build: {
+    minify: "terser",
+    cssMinify: "esbuild",
+    rollupOptions: {
+      plugins: [
+        terser({
+          format: {
+            // 取消代码注释
+            comments: false
+          },
+
+          mangle: {
+            keep_classnames: false,
+            reserved: []
+          }
+        })
+      ],
+      output: {
+        manualChunks: (id) => {
+          if (id.includes("node_modules")) {
+            return "deps";
+          }
+        }
+      }
+    }
+  },
   plugins: [
     vue({
       template: {
@@ -27,9 +60,9 @@ export default defineConfig({
         icons: [
           //添加图标， 注意路径和图像像素正确
           {
-            src: "assets/favicon.png",
+            src: "favicon.webp",
             sizes: "1024x1024", //icon大小要与实际icon大小一致
-            type: "image/png"
+            type: "image/webp"
             // form_factor: "handset",
           }
         ]
@@ -40,7 +73,7 @@ export default defineConfig({
         runtimeCaching: [
           {
             urlPattern: /\.(?:png|jpg|jpeg|svg)$/,
-            handler: "CacheFirst",
+            handler: "NetworkFirst",
             options: {
               cacheName: "wisbayar-images",
               expiration: {
@@ -96,7 +129,25 @@ export default defineConfig({
       devOptions: {
         enabled: true
       }
-    })
+    }),
+    {
+      name: "Abracadabra-Favicon",
+      apply: "build", // 只在生产构建时生效
+      configResolved(config) {
+        // 保存最终输出目录路径
+        outDir = path.resolve(config.root, config.build.outDir);
+        configStore = config;
+      },
+      async writeBundle() {
+        // 自定义内容
+        const TargetContentPath = path.join(configStore.root, "favicon.webp");
+        const TargetContent = fs.readFileSync(TargetContentPath);
+
+        //创建全新文件
+        const newFilePath = path.join(outDir, "favicon.webp");
+        fs.writeFileSync(newFilePath, TargetContent);
+      }
+    }
   ],
   base: "./",
   resolve: {

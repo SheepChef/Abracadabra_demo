@@ -1,12 +1,12 @@
 <script setup>
 import { ref, onMounted, onBeforeMount } from "vue";
-//import HelloWorld from './components/HelloWorld.vue'
 import "mdui/mdui.css";
-import "mdui";
-import "@mdui/icons/menu.js";
+//import "mdui";
+//import "@mdui/icons/menu.js";
 import "@/assets/mdui-icon.css";
 import "@/assets/main.css";
-import "mdui/components/divider.js";
+//import "mdui/components/divider.js";
+import "mdui/components/layout.js";
 import ImMainView from "@/components/ImMainView.vue";
 
 onMounted(() => {});

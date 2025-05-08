@@ -1,25 +1,44 @@
 <script setup>
 import Card from "@/components/MdCard.vue";
-import { ref, onMounted, onBeforeUnmount, onUnmounted, watch } from "vue";
-import "@mdui/icons/autorenew--rounded.js";
+import { ref, onMounted, onBeforeUnmount, onUnmounted, watch, nextTick } from "vue";
+/*import "@mdui/icons/autorenew--rounded.js";
 import "@mdui/icons/do-not-disturb-alt--rounded.js";
 import "@mdui/icons/explore.js";
-import "@mdui/icons/done--rounded.js";
-import { snackbar } from "mdui/functions/snackbar.js";
+import "@mdui/icons/done--rounded.js";*/
+
+import { snackbar as Snbar } from "mdui/functions/snackbar.js";
+import "mdui/components/switch.js";
+import "mdui/components/card.js";
+import "mdui/components/chip.js";
+import "mdui/components/button.js";
+import "mdui/components/text-field.js";
+import "mdui/components/slider.js";
 
 import { Abracadabra } from "abracadabra-cn";
 
 const InputMode = ref("TEXT");
 const OutputMode = ref("TEXT");
+const EncMode = ref("Next");
 const ShowPWAButton = ref(true);
 const ForceEnc = ref(false);
 const ForceDec = ref(false);
 const ForceEncq = ref(false);
+const ForcePian = ref(false);
+const ForceLogi = ref(false);
+const ForceNoMark = ref(false);
 const FileCardColor = ref("#5b6169");
 var dropzoneActive = false;
 var filess = ref(new Array());
 const INFILE = ref(null);
 const FILENAME = ref("");
+
+function snackbar(obj) {
+  let Bar = document.getElementById("InfoBar");
+  let mes = obj.message;
+
+  Bar.innerText = mes;
+  Bar.open = true;
+}
 
 watch(
   () => filess.value[0],
@@ -116,23 +135,42 @@ const isPWA = () => {
 };
 
 function ControlEnc() {
-  if (document.getElementById("ForceEnc").checked == true) {
-    document.getElementById("ForceDec").disabled = true;
-    document.getElementById("ForceDec").checked = false;
-    ForceEnc.value = true;
-    ForceDec.value = false;
-  } else if (document.getElementById("ForceDec").checked == true) {
-    document.getElementById("ForceEnc").disabled = true;
-    document.getElementById("Forceq").disabled = true;
-    document.getElementById("ForceEnc").checked = false;
-    ForceEnc.value = false;
-    ForceDec.value = true;
+  if (EncMode.value == "Next") {
+    if (document.getElementById("ForcePian").checked == true) {
+      document.getElementById("ForceLogi").disabled = true;
+      document.getElementById("ForceLogi").checked = false;
+      ForcePian.value = true;
+      ForceLogi.value = false;
+    } else if (document.getElementById("ForceLogi").checked == true) {
+      document.getElementById("ForcePian").disabled = true;
+      document.getElementById("ForcePian").checked = false;
+      ForcePian.value = false;
+      ForceLogi.value = true;
+    } else {
+      document.getElementById("ForcePian").disabled = false;
+      document.getElementById("ForceLogi").disabled = false;
+      ForceLogi.value = false;
+      ForcePian.value = false;
+    }
   } else {
-    document.getElementById("ForceDec").disabled = false;
-    document.getElementById("ForceEnc").disabled = false;
-    document.getElementById("Forceq").disabled = false;
-    ForceEnc.value = false;
-    ForceDec.value = false;
+    if (document.getElementById("ForceEnc").checked == true) {
+      document.getElementById("ForceDec").disabled = true;
+      document.getElementById("ForceDec").checked = false;
+      ForceEnc.value = true;
+      ForceDec.value = false;
+    } else if (document.getElementById("ForceDec").checked == true) {
+      document.getElementById("ForceEnc").disabled = true;
+      document.getElementById("Forceq").disabled = true;
+      document.getElementById("ForceEnc").checked = false;
+      ForceEnc.value = false;
+      ForceDec.value = true;
+    } else {
+      document.getElementById("ForceDec").disabled = false;
+      document.getElementById("ForceEnc").disabled = false;
+      document.getElementById("Forceq").disabled = false;
+      ForceEnc.value = false;
+      ForceDec.value = false;
+    }
   }
 }
 function ControlEncq() {
@@ -142,10 +180,26 @@ function ControlEncq() {
     ForceEncq.value = false;
   }
 }
+function ControlNoMark() {
+  if (document.getElementById("ForceNoMark").checked == true) {
+    ForceNoMark.value = true;
+  } else {
+    ForceNoMark.value = false;
+  }
+}
 
-async function KeyEnter() {
-  document.getElementById("KeyCard").blur();
-  await ProcessGo();
+async function Switch() {
+  if (EncMode.value == "Normal") {
+    document.getElementById("NormalControlBar").style.display = "none";
+    document.getElementById("NextControlBar").style.display = "grid";
+    EncMode.value = "Next";
+  } else if (EncMode.value == "Next") {
+    document.getElementById("NormalControlBar").style.display = "block";
+    document.getElementById("NextControlBar").style.display = "none";
+    EncMode.value = "Normal";
+  }
+  await nextTick();
+  ControlEnc();
 }
 
 async function ProcessGo() {
@@ -222,6 +276,129 @@ async function ProcessGo() {
   }
 }
 
+async function ProcessEncNext() {
+  let Abra = new Abracadabra(InputMode.value, OutputMode.value);
+  let key;
+  try {
+    if (InputMode.value == "TEXT") {
+      if (document.getElementById("InputCard").value == "") {
+        return;
+      }
+      if (document.getElementById("KeyCard").value == "") {
+        key = "ABRACADABRA";
+        snackbar({
+          message: "你没有填写魔咒，自动使用默认魔咒，这不安全",
+          autoCloseDelay: 1500
+        });
+      } else {
+        key = document.getElementById("KeyCard").value;
+      }
+      Abra.Input_Next(
+        document.getElementById("InputCard").value,
+        "ENCRYPT",
+        key,
+        !ForceNoMark.value,
+        parseInt(document.querySelector("#Randomness").value),
+        ForcePian.value,
+        ForceLogi.value
+      );
+    } else if (InputMode.value == "UINT8") {
+      if (window.inputfile == undefined || window.inputfile == null) {
+        return;
+      }
+      if (document.getElementById("KeyCard").value == "") {
+        key = "ABRACADABRA";
+        snackbar({
+          message: "你没有填写魔咒，自动使用默认魔咒，这不安全",
+          autoCloseDelay: 1500
+        });
+      } else {
+        key = document.getElementById("KeyCard").value;
+      }
+      let FileU = await fileToUint8Array(window.inputfile);
+      Abra.Input_Next(
+        FileU,
+        "ENCRYPT",
+        key,
+        !ForceNoMark.value,
+        parseInt(document.querySelector("#Randomness").value),
+        ForcePian.value,
+        ForceLogi.value
+      );
+    }
+    if (OutputMode.value == "TEXT") {
+      document.getElementById("OutputText").value = Abra.Output();
+    } else if (OutputMode.value == "UINT8") {
+      let OutUint = Abra.Output();
+      let FileOut = uint8ArrayToFile(OutUint, "Abracadabra_Result", "application/octet-stream");
+
+      let aTag = document.createElement("a"); //创建一个a标签
+      aTag.download = FileOut.name;
+      let href = URL.createObjectURL(FileOut); //获取url
+      aTag.href = href;
+      aTag.click();
+      URL.revokeObjectURL(href); //释放url
+    }
+  } catch (err) {
+    snackbar({
+      message: "发生错误, " + err.toString()
+    });
+  }
+}
+
+async function ProcessDecNext() {
+  let Abra = new Abracadabra(InputMode.value, OutputMode.value);
+  let key;
+  try {
+    if (InputMode.value == "TEXT") {
+      if (document.getElementById("InputCard").value == "") {
+        return;
+      }
+      if (document.getElementById("KeyCard").value == "") {
+        key = "ABRACADABRA";
+        snackbar({
+          message: "你没有填写魔咒，自动使用默认魔咒，这不安全",
+          autoCloseDelay: 1500
+        });
+      } else {
+        key = document.getElementById("KeyCard").value;
+      }
+      Abra.Input_Next(document.getElementById("InputCard").value, "DECRYPT", key);
+    } else if (InputMode.value == "UINT8") {
+      if (window.inputfile == undefined || window.inputfile == null) {
+        return;
+      }
+      if (document.getElementById("KeyCard").value == "") {
+        key = "ABRACADABRA";
+        snackbar({
+          message: "你没有填写魔咒，自动使用默认魔咒，这不安全",
+          autoCloseDelay: 1500
+        });
+      } else {
+        key = document.getElementById("KeyCard").value;
+      }
+      let FileU = await fileToUint8Array(window.inputfile);
+      Abra.Input_Next(FileU, "DECRYPT", key);
+    }
+    if (OutputMode.value == "TEXT") {
+      document.getElementById("OutputText").value = Abra.Output();
+    } else if (OutputMode.value == "UINT8") {
+      let OutUint = Abra.Output();
+      let FileOut = uint8ArrayToFile(OutUint, "Abracadabra_Result", "application/octet-stream");
+
+      let aTag = document.createElement("a"); //创建一个a标签
+      aTag.download = FileOut.name;
+      let href = URL.createObjectURL(FileOut); //获取url
+      aTag.href = href;
+      aTag.click();
+      URL.revokeObjectURL(href); //释放url
+    }
+  } catch (err) {
+    snackbar({
+      message: "发生错误, " + err.toString()
+    });
+  }
+}
 function copyall() {
   if (document.getElementById("OutputText").value == "") {
     return;
@@ -253,6 +430,21 @@ onMounted(() => {
     ShowPWAButton.value = false;
   }
   ControlEnc();
+  const slider = document.querySelector("#Randomness");
+  slider.labelFormatter = (value) => {
+    if (value == 0) {
+      return "长句优先";
+    } else if (value == 25) {
+      return "稍随机";
+    } else if (value == 50) {
+      return "适中";
+    } else if (value == 75) {
+      return "较随机";
+    } else if (value == 100) {
+      return "完全随机";
+    }
+    return "";
+  };
 });
 onBeforeUnmount(() => {});
 </script>
@@ -315,7 +507,6 @@ onBeforeUnmount(() => {});
       </Card>
       <div id="controlBar" style="grid-area: 2; display: grid; grid-template-columns: 360px">
         <mdui-text-field
-          @keydown.enter="KeyEnter"
           id="KeyCard"
           variant="outlined"
           rows="1"
@@ -323,13 +514,77 @@ onBeforeUnmount(() => {});
           placeholder="将一切雪藏的魔咒"
           style="grid-column: span 3; align-self: center; width: 360px"
         ></mdui-text-field>
-        <mdui-button
-          icon="arrow_downward--rounded"
-          @click="ProcessGo"
-          full-width
-          style="align-self: center; top: -4px"
-          >吟唱你的魔法</mdui-button
+        <div id="NormalControlBar" style="align-self: center; display: none">
+          <mdui-button
+            icon="arrow_downward--rounded"
+            @click="ProcessGo"
+            style="align-self: center; top: -4px; width: 230px; margin-right: 6px"
+            >吟唱你的魔法</mdui-button
+          >
+          <mdui-button
+            variant="elevated"
+            icon="auto_awesome--rounded"
+            @click="Switch"
+            style="align-self: center; top: -4px; width: 120px; border: solid 2px white"
+            >文言仿真</mdui-button
+          >
+        </div>
+        <div
+          id="NextControlBar"
+          style="align-self: center; display: grid; grid-template-columns: 235px 124px"
         >
+          <mdui-button
+            icon="arrow_downward--rounded"
+            @click="ProcessGo"
+            style="align-self: center; top: -4px; width: 230px; margin-right: 6px; display: none"
+            >吟唱你的魔法</mdui-button
+          >
+          <div style="display: grid; grid-template-rows: 40px 33px">
+            <div
+              style="
+                width: fit-content;
+                align-self: center;
+                justify-self: center;
+                margin-left: -10px;
+              "
+            >
+              <mdui-chip
+                icon="keyboard_double_arrow_down--rounded"
+                @click="ProcessEncNext"
+                style="align-self: center; width: 105px; text-align: center; margin-right: 5px"
+                >加密</mdui-chip
+              >
+              <mdui-chip
+                icon="keyboard_double_arrow_down--rounded"
+                @click="ProcessDecNext"
+                style="align-self: center; width: 105px; text-align: center"
+                >解密</mdui-chip
+              >
+            </div>
+            <mdui-slider
+              id="Randomness"
+              step="25"
+              value="50"
+              min="0"
+              max="100"
+              style="
+                background: #0000003b;
+                padding: 0 25px;
+                width: 215px;
+                margin-left: 5px;
+                border-radius: 25px;
+                height: 35px;
+              "
+            ></mdui-slider>
+          </div>
+          <mdui-button
+            variant="elevated"
+            icon="auto_fix_off--rounded"
+            @click="Switch"
+            style="align-self: center; top: -4px; width: 120px; border: solid 2px white"
+            >传统加密</mdui-button
+          >
+        </div>
       </div>
       <mdui-text-field
         v-if="OutputMode == 'TEXT'"
@@ -345,7 +600,7 @@ onBeforeUnmount(() => {});
         icon="content_copy--rounded"
         style="
           position: absolute;
-          bottom: 95px;
+          bottom: 103px;
           right: 22px;
           background: rgb(11 11 11 / 25%);
           backdrop-filter: blur(2px);
@@ -377,7 +632,7 @@ onBeforeUnmount(() => {});
             margin: 0px;
           "
         >
-          Abracadabra V2.6.9<br /><a href="https://github.com/SheepChef/Abracadabra">Github Repo</a>
+          Abracadabra V3.1.3<br /><a href="https://github.com/SheepChef/Abracadabra">Github Repo</a>
         </p>
         <mdui-chip
           v-if="ShowPWAButton"
@@ -417,24 +672,77 @@ onBeforeUnmount(() => {});
   </Card>
   <Card id="FloatCard">
     <div id="CryptControl">
-      <span style="align-self: center; justify-self: right; margin-right: 0px">雪藏话语</span>
+      <span
+        v-if="EncMode == 'Next'"
+        style="align-self: center; justify-self: right; margin-right: 0px"
+        >骈文格律</span
+      >
       <mdui-switch
+        v-if="EncMode == 'Next'"
+        id="ForcePian"
+        style="align-self: center; justify-self: left"
+        unchecked-icon="hdr_auto--rounded"
+        checked-icon="auto_awesome--rounded"
+        @change="ControlEnc"
+      ></mdui-switch>
+      <span
+        v-if="EncMode == 'Next'"
+        style="align-self: center; justify-self: right; margin-right: 0px"
+        >逻辑优先</span
+      >
+      <mdui-switch
+        v-if="EncMode == 'Next'"
+        id="ForceLogi"
+        style="align-self: center; justify-self: left"
+        unchecked-icon="hdr_auto--rounded"
+        checked-icon="auto_awesome--rounded"
+        @change="ControlEnc"
+      ></mdui-switch>
+      <span
+        v-if="EncMode == 'Next'"
+        style="align-self: center; justify-self: right; margin-right: 0px"
+        >去除标点</span
+      >
+      <mdui-switch
+        v-if="EncMode == 'Next'"
+        id="ForceNoMark"
+        checked-icon="auto_awesome--rounded"
+        style="align-self: center; justify-self: left"
+        @change="ControlNoMark"
+      ></mdui-switch>
+      <span
+        v-if="EncMode == 'Normal'"
+        style="align-self: center; justify-self: right; margin-right: 0px"
+        >雪藏话语</span
+      >
+      <mdui-switch
+        v-if="EncMode == 'Normal'"
         id="ForceEnc"
         style="align-self: center; justify-self: left"
         unchecked-icon="hdr_auto--rounded"
         checked-icon="auto_awesome--rounded"
         @change="ControlEnc"
       ></mdui-switch>
-      <span style="align-self: center; justify-self: right; margin-right: 0px">探求真意</span>
+      <span
+        v-if="EncMode == 'Normal'"
+        style="align-self: center; justify-self: right; margin-right: 0px"
+        >探求真意</span
+      >
       <mdui-switch
+        v-if="EncMode == 'Normal'"
         id="ForceDec"
         style="align-self: center; justify-self: left"
         unchecked-icon="hdr_auto--rounded"
         checked-icon="auto_awesome--rounded"
         @change="ControlEnc"
       ></mdui-switch>
-      <span style="align-self: center; justify-self: right; margin-right: 0px">去除标志</span>
+      <span
+        v-if="EncMode == 'Normal'"
+        style="align-self: center; justify-self: right; margin-right: 0px"
+        >去除标志</span
+      >
       <mdui-switch
+        v-if="EncMode == 'Normal'"
         id="Forceq"
         checked-icon="auto_awesome--rounded"
         style="align-self: center; justify-self: left"
@@ -443,5 +751,6 @@ onBeforeUnmount(() => {});
     </div>
   </Card>
   <div id="PositionOccupie"></div>
+  <mdui-snackbar auto-close-delay="1500" id="InfoBar"></mdui-snackbar>
 </template>
 <style scoped></style>

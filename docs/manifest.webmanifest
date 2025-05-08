@@ -1,1 +1,1 @@
-{"name":"魔曰","short_name":"Abracadabra","start_url":".","display":"standalone","background_color":"#ffffff","lang":"en","scope":"./","id":"abracadabra","description":"对文字施以神秘魔法","theme_color":"#5753c9","icons":[{"src":"assets/favicon.png","sizes":"1024x1024","type":"image/png"}]}
+{"name":"魔曰","short_name":"Abracadabra","start_url":".","display":"standalone","background_color":"#ffffff","lang":"en","scope":"./","id":"abracadabra","description":"对文字施以神秘魔法","theme_color":"#5753c9","icons":[{"src":"favicon.webp","sizes":"1024x1024","type":"image/webp"}]}
