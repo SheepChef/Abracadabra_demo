@@ -632,7 +632,7 @@ onBeforeUnmount(() => {});
             margin: 0px;
           "
         >
-          Abracadabra V3.1.3<br /><a style="color: #637eff">Offline Build</a>
+          Abracadabra V3.1.5<br /><a style="color: #637eff">Offline Build</a>
         </p>
         <p
           style="
