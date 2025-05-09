@@ -27,6 +27,9 @@ export default defineConfig({
       ],
       output: {
         manualChunks: (id) => {
+          if (id.includes("abracadabra-cn")) {
+            return "abracadabra-cn";
+          }
           if (id.includes("node_modules")) {
             return "deps";
           }

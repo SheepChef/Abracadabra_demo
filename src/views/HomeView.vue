@@ -592,7 +592,7 @@ onBeforeUnmount(() => {});
             margin: 0px;
           "
         >
-          Abracadabra V3.1.3<br /><a href="https://github.com/SheepChef/Abracadabra">Github Repo</a>
+          Abracadabra V3.1.5<br /><a style="color: #637eff">Offline Build</a>
         </p>
         <p
           style="
