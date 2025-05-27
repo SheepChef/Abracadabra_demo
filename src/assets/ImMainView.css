@@ -42,7 +42,7 @@
   body {
     background: url("./bg.webp");
     background-size: cover;
-    background-position: -400px;
+    background-position: -340px;
     zoom: 80%;
   }
 }
@@ -51,7 +51,7 @@
   body {
     background: url("./bg.webp");
     background-size: cover;
-    background-position: -400px;
+    background-position: -340px;
     zoom: 90%;
   }
 }
@@ -60,7 +60,7 @@
   body {
     background: url("./bg.webp");
     background-size: cover;
-    background-position: -400px;
+    background-position: -340px;
   }
   #MagicBadge {
     position: absolute;
@@ -68,7 +68,7 @@
     height: 220px;
     width: 100%;
     top: 0px;
-    background-image: linear-gradient(0deg, #5753c900 0%, #5753c957 20%, #6e7ff3 100%);
+    background-image: linear-gradient(0deg, #5753c900 0%, #5753c91f 20%, #6e7ff378 100%);
     grid-template-rows: min-content;
   }
   #FunctionCard {
@@ -80,7 +80,7 @@
     align-self: center;
     justify-self: center;
     background: rgb(10 2 21 / 60%);
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(4px);
     box-shadow: 0px 6px 20px 0px rgb(0 0 0 / 66%);
   }
   #FloatCard {
@@ -92,7 +92,7 @@
     z-index: -1;
     top: 140px;
     background: rgb(10 2 21 / 60%);
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(4px);
     box-shadow: 0px 6px 20px 0px rgb(0 0 0 / 66%);
   }
   #CryptControl {
@@ -120,6 +120,7 @@
   body {
     background: url("./bg.webp");
     background-size: cover;
+    background-position: center;
   }
   #MagicBadge {
     position: absolute;
@@ -127,14 +128,14 @@
     height: 220px;
     width: 100%;
     top: 80px;
-    background-image: linear-gradient(
+    /*background-image: linear-gradient(
       -435deg,
       #5753c9b5 0%,
       #5753c900 35%,
       #5753c9 85%,
       #6e7ff3 100%
-    );
-
+    );*/
+    background-image: linear-gradient(90deg, #5753c94d 0%, #5753c900 20%);
     grid-template-rows: min-content;
   }
   #FunctionCard {
@@ -146,7 +147,7 @@
     left: calc(80% - 360px);
     top: 70px;
     padding: 20px 15px 15px;
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(4px);
     box-shadow: 0px 6px 20px 0px rgb(0 0 0 / 66%);
   }
   #FloatCard {
@@ -157,7 +158,7 @@
     left: calc(80% - 520px);
     top: -80px;
     background: rgb(10 2 21 / 60%);
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(4px);
     box-shadow: 0px 6px 20px 0px rgb(0 0 0 / 66%);
   }
   #CryptControl {
