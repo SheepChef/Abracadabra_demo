@@ -221,14 +221,14 @@ async function ProcessGo() {
       }
       if (ForceEnc.value) {
         if (ForceEncq.value) {
-          Abra.Input(document.getElementById("InputCard").value, "ENCRYPT", key, true);
+          Abra.OldInput(document.getElementById("InputCard").value, "ENCRYPT", key, true);
         } else {
-          Abra.Input(document.getElementById("InputCard").value, "ENCRYPT", key, false);
+          Abra.OldInput(document.getElementById("InputCard").value, "ENCRYPT", key, false);
         }
       } else if (ForceDec.value) {
-        Abra.Input(document.getElementById("InputCard").value, "DECRYPT", key);
+        Abra.OldInput(document.getElementById("InputCard").value, "DECRYPT", key);
       } else {
-        Abra.Input(document.getElementById("InputCard").value, "AUTO", key, ForceEncq.value);
+        Abra.OldInput(document.getElementById("InputCard").value, "AUTO", key, ForceEncq.value);
       }
     } else if (InputMode.value == "UINT8") {
       if (window.inputfile == undefined || window.inputfile == null) {
@@ -246,14 +246,14 @@ async function ProcessGo() {
       let FileU = await fileToUint8Array(window.inputfile);
       if (ForceEnc.value) {
         if (ForceEncq.value) {
-          Abra.Input(FileU, "ENCRYPT", key, true);
+          Abra.OldInput(FileU, "ENCRYPT", key, true);
         } else {
-          Abra.Input(FileU, "ENCRYPT", key, false);
+          Abra.OldInput(FileU, "ENCRYPT", key, false);
         }
       } else if (ForceDec.value) {
-        Abra.Input(FileU, "DECRYPT", key);
+        Abra.OldInput(FileU, "DECRYPT", key);
       } else {
-        Abra.Input(FileU, "AUTO", key, ForceEncq.value);
+        Abra.OldInput(FileU, "AUTO", key, ForceEncq.value);
       }
     }
     if (OutputMode.value == "TEXT") {
@@ -293,15 +293,12 @@ async function ProcessEncNext() {
       } else {
         key = document.getElementById("KeyCard").value;
       }
-      Abra.Input_Next(
-        document.getElementById("InputCard").value,
-        "ENCRYPT",
-        key,
-        !ForceNoMark.value,
-        parseInt(document.querySelector("#Randomness").value),
-        ForcePian.value,
-        ForceLogi.value
-      );
+      Abra.WenyanInput(document.getElementById("InputCard").value, "ENCRYPT", key, {
+        PunctuationMark: !ForceNoMark.value,
+        RandomIndex: parseInt(document.querySelector("#Randomness").value),
+        PianwenMode: ForcePian.value,
+        LogicMode: ForceLogi.value
+      });
     } else if (InputMode.value == "UINT8") {
       if (window.inputfile == undefined || window.inputfile == null) {
         return;
@@ -316,15 +313,12 @@ async function ProcessEncNext() {
         key = document.getElementById("KeyCard").value;
       }
       let FileU = await fileToUint8Array(window.inputfile);
-      Abra.Input_Next(
-        FileU,
-        "ENCRYPT",
-        key,
-        !ForceNoMark.value,
-        parseInt(document.querySelector("#Randomness").value),
-        ForcePian.value,
-        ForceLogi.value
-      );
+      Abra.WenyanInput(FileU, "ENCRYPT", key, {
+        PunctuationMark: !ForceNoMark.value,
+        RandomIndex: parseInt(document.querySelector("#Randomness").value),
+        PianwenMode: ForcePian.value,
+        LogicMode: ForceLogi.value
+      });
     }
     if (OutputMode.value == "TEXT") {
       document.getElementById("OutputText").value = Abra.Output();
@@ -363,7 +357,7 @@ async function ProcessDecNext() {
       } else {
         key = document.getElementById("KeyCard").value;
       }
-      Abra.Input_Next(document.getElementById("InputCard").value, "DECRYPT", key);
+      Abra.WenyanInput(document.getElementById("InputCard").value, "DECRYPT", key);
     } else if (InputMode.value == "UINT8") {
       if (window.inputfile == undefined || window.inputfile == null) {
         return;
@@ -378,7 +372,7 @@ async function ProcessDecNext() {
         key = document.getElementById("KeyCard").value;
       }
       let FileU = await fileToUint8Array(window.inputfile);
-      Abra.Input_Next(FileU, "DECRYPT", key);
+      Abra.WenyanInput(FileU, "DECRYPT", key);
     }
     if (OutputMode.value == "TEXT") {
       document.getElementById("OutputText").value = Abra.Output();
@@ -592,7 +586,7 @@ onBeforeUnmount(() => {});
             margin: 0px;
           "
         >
-          Abracadabra V3.1.11<br /><a style="color: #637eff">Offline Build</a>
+          Abracadabra V3.2.0<br /><a style="color: #637eff">Offline Build</a>
         </p>
         <p
           style="
