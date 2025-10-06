@@ -13,6 +13,9 @@ import "mdui/components/chip.js";
 import "mdui/components/button.js";
 import "mdui/components/text-field.js";
 import "mdui/components/slider.js";
+import "mdui/components/list.js";
+import "mdui/components/list-item.js";
+import "mdui/components/list-subheader.js";
 
 import { Abracadabra } from "abracadabra-cn";
 
@@ -26,6 +29,15 @@ const ForceEncq = ref(false);
 const ForcePian = ref(false);
 const ForceLogi = ref(false);
 const ForceNoMark = ref(false);
+const ForceTraditional = ref(false);
+const Geeker = ref(false);
+
+const Rounds = ref(["No Data Available"]);
+const Status = ref("NONE");
+const StepData = ref("None");
+
+const ExecuteCounter = ref(0);
+
 const FileCardColor = ref("#5b6169");
 var dropzoneActive = false;
 var filess = ref(new Array());
@@ -188,6 +200,14 @@ function ControlNoMark() {
   }
 }
 
+function ControlTraditional() {
+  if (document.getElementById("ForceTraditional").checked == true) {
+    ForceTraditional.value = true;
+  } else {
+    ForceTraditional.value = false;
+  }
+}
+
 async function Switch() {
   if (EncMode.value == "Normal") {
     document.getElementById("NormalControlBar").style.display = "none";
@@ -216,6 +236,7 @@ async function ProcessGo() {
           message: "你没有填写魔咒，自动使用默认魔咒，这不安全",
           autoCloseDelay: 1500
         });
+        document.getElementById("KeyCard").value = "ABRACADABRA";
       } else {
         key = document.getElementById("KeyCard").value;
       }
@@ -240,6 +261,7 @@ async function ProcessGo() {
           message: "你没有填写魔咒，自动使用默认魔咒，这不安全",
           autoCloseDelay: 1500
         });
+        document.getElementById("KeyCard").value = "ABRACADABRA";
       } else {
         key = document.getElementById("KeyCard").value;
       }
@@ -277,6 +299,7 @@ async function ProcessGo() {
 }
 
 async function ProcessEncNext() {
+  ExecuteCounter.value++;
   let Abra = new Abracadabra(InputMode.value, OutputMode.value);
   let key;
   try {
@@ -290,14 +313,36 @@ async function ProcessEncNext() {
           message: "你没有填写魔咒，自动使用默认魔咒，这不安全",
           autoCloseDelay: 1500
         });
+        document.getElementById("KeyCard").value = "ABRACADABRA";
       } else {
         key = document.getElementById("KeyCard").value;
       }
-      Abra.WenyanInput(document.getElementById("InputCard").value, "ENCRYPT", key, {
-        PunctuationMark: !ForceNoMark.value,
-        RandomIndex: parseInt(document.querySelector("#Randomness").value),
-        PianwenMode: ForcePian.value,
-        LogicMode: ForceLogi.value
+      await new Promise((resolve) => {
+        Abra.WenyanInput(
+          document.getElementById("InputCard").value,
+          "ENCRYPT",
+          key,
+          {
+            PunctuationMark: !ForceNoMark.value,
+            RandomIndex: parseInt(document.querySelector("#Randomness").value),
+            PianwenMode: ForcePian.value,
+            LogicMode: ForceLogi.value,
+            Traditional: ForceTraditional.value
+          },
+          Geeker.value === true ? GeekCallback : null
+        );
+        resolve();
+      }).finally(() => {
+        //这段写得非常不优雅。
+        if (Geeker.value === true) {
+          setInterval(() => {
+            document.getElementById("ImContentContainer").style.height = "100.1%";
+          }, mswaiter + 50);
+          setInterval(() => {
+            document.getElementById("ImContentContainer").style.height = "100%";
+          }, mswaiter + 100);
+          mswaiter = 50;
+        }
       });
     } else if (InputMode.value == "UINT8") {
       if (window.inputfile == undefined || window.inputfile == null) {
@@ -309,6 +354,7 @@ async function ProcessEncNext() {
           message: "你没有填写魔咒，自动使用默认魔咒，这不安全",
           autoCloseDelay: 1500
         });
+        document.getElementById("KeyCard").value = "ABRACADABRA";
       } else {
         key = document.getElementById("KeyCard").value;
       }
@@ -317,7 +363,8 @@ async function ProcessEncNext() {
         PunctuationMark: !ForceNoMark.value,
         RandomIndex: parseInt(document.querySelector("#Randomness").value),
         PianwenMode: ForcePian.value,
-        LogicMode: ForceLogi.value
+        LogicMode: ForceLogi.value,
+        Traditional: ForceTraditional.value
       });
     }
     if (OutputMode.value == "TEXT") {
@@ -341,6 +388,7 @@ async function ProcessEncNext() {
 }
 
 async function ProcessDecNext() {
+  ExecuteCounter.value++;
   let Abra = new Abracadabra(InputMode.value, OutputMode.value);
   let key;
   try {
@@ -354,10 +402,30 @@ async function ProcessDecNext() {
           message: "你没有填写魔咒，自动使用默认魔咒，这不安全",
           autoCloseDelay: 1500
         });
+        document.getElementById("KeyCard").value = "ABRACADABRA";
       } else {
         key = document.getElementById("KeyCard").value;
       }
-      Abra.WenyanInput(document.getElementById("InputCard").value, "DECRYPT", key);
+      await new Promise((resolve) => {
+        Abra.WenyanInput(
+          document.getElementById("InputCard").value,
+          "DECRYPT",
+          key,
+          null,
+          Geeker.value === true ? GeekCallback : null
+        );
+        resolve();
+      }).finally(() => {
+        if (Geeker.value === true) {
+          setInterval(() => {
+            document.getElementById("ImContentContainer").style.height = "100.1%";
+          }, mswaiter + 50);
+          setInterval(() => {
+            document.getElementById("ImContentContainer").style.height = "100%";
+          }, mswaiter + 100);
+          mswaiter = 50;
+        }
+      });
     } else if (InputMode.value == "UINT8") {
       if (window.inputfile == undefined || window.inputfile == null) {
         return;
@@ -368,6 +436,7 @@ async function ProcessDecNext() {
           message: "你没有填写魔咒，自动使用默认魔咒，这不安全",
           autoCloseDelay: 1500
         });
+        document.getElementById("KeyCard").value = "ABRACADABRA";
       } else {
         key = document.getElementById("KeyCard").value;
       }
@@ -401,6 +470,25 @@ function copyall() {
   navigator.clipboard.writeText(window.getSelection().toString());
 }
 
+var mswaiter = 50;
+
+function GeekCallback(Obj) {
+  mswaiter = mswaiter + 50;
+  let Tag = ExecuteCounter.value;
+  setTimeout(() => {
+    let Tag2 = ExecuteCounter.value;
+    if (Tag != Tag2) {
+      return;
+    }
+    if (Obj.Type == "ROUNDS") {
+      Rounds.value = Obj.Value;
+    } else {
+      Status.value = Obj.Type;
+      StepData.value = Obj.Value;
+    }
+  }, mswaiter);
+}
+
 async function InstallPWA() {
   if (window.deferredPrompt) {
     // 显示安装提示
@@ -418,7 +506,59 @@ async function InstallPWA() {
     // 重置提示变量
   }
 }
-
+var TapCountTemp = 0;
+var TapHiddenInterval;
+function HiddenTaps() {
+  if (Geeker.value) {
+    snackbar({
+      autoCloseDelay: 1000,
+      message: "ヾ(≧▽≦*)o 感谢您使用魔曰加密。"
+    });
+    return;
+  }
+  if (document.querySelector("#CopyRightSheepChef").getAttribute("count") == "0") {
+    TapHiddenInterval = setInterval(function () {
+      if (
+        TapCountTemp ==
+          parseInt(document.querySelector("#CopyRightSheepChef").getAttribute("count")) &&
+        TapCountTemp != 0
+      ) {
+        //End Tap
+        TapCountTemp = 0;
+        document.querySelector("#CopyRightSheepChef").setAttribute("count", "0");
+        clearInterval(TapHiddenInterval);
+        return;
+      }
+      TapCountTemp = parseInt(document.querySelector("#CopyRightSheepChef").getAttribute("count"));
+    }, 1000);
+    TapCountTemp = parseInt(document.querySelector("#CopyRightSheepChef").getAttribute("count"));
+    document.querySelector("#CopyRightSheepChef").setAttribute("count", "1");
+  } else {
+    document
+      .querySelector("#CopyRightSheepChef")
+      .setAttribute(
+        "count",
+        (
+          parseInt(document.querySelector("#CopyRightSheepChef").getAttribute("count")) + 1
+        ).toString()
+      );
+    if (parseInt(document.querySelector("#CopyRightSheepChef").getAttribute("count")) == 3) {
+      //如果点击了三次以上
+      snackbar({
+        autoCloseDelay: 1000,
+        message: "ヾ(≧▽≦*)o 多点几次！"
+      });
+    }
+    if (parseInt(document.querySelector("#CopyRightSheepChef").getAttribute("count")) == 10) {
+      //如果点击了十次以上
+      snackbar({
+        autoCloseDelay: 1000,
+        message: "极客佐料已激活"
+      });
+      Geeker.value = true;
+    }
+  }
+}
 onMounted(() => {
   if (isPWA()) {
     ShowPWAButton.value = false;
@@ -439,6 +579,11 @@ onMounted(() => {
     }
     return "";
   };
+
+  watch(Geeker, () => {
+    document.getElementById("ImContentContainer").style.height = "100.1%";
+    document.getElementById("ImContentContainer").style.height = "100%";
+  });
 });
 onBeforeUnmount(() => {});
 </script>
@@ -626,9 +771,12 @@ onBeforeUnmount(() => {});
             margin: 0px;
           "
         >
-          Abracadabra V3.2.0<br /><a style="color: #637eff">Offline Build</a>
+          Abracadabra V3.2.5<br /><a style="color: #637eff">Offline Build</a>
         </p>
         <p
+          id="CopyRightSheepChef"
+          @click="HiddenTaps()"
+          count="0"
           style="
             position: relative;
             width: fit-content;
@@ -643,6 +791,8 @@ onBeforeUnmount(() => {});
             right: 4px;
             justify-self: end;
             opacity: 0.5;
+            cursor: pointer;
+            user-select: none;
           "
         >
           SheepChef ©
@@ -650,7 +800,7 @@ onBeforeUnmount(() => {});
       </div>
     </div>
   </Card>
-  <Card id="FloatCard">
+  <Card id="FloatCard" :class="{ oldfloat: EncMode == 'Normal' }">
     <div id="CryptControl">
       <span
         v-if="EncMode == 'Next'"
@@ -691,6 +841,18 @@ onBeforeUnmount(() => {});
         @change="ControlNoMark"
       ></mdui-switch>
       <span
+        v-if="EncMode == 'Next'"
+        style="align-self: center; justify-self: right; margin-right: 0px"
+        >繁體中文</span
+      >
+      <mdui-switch
+        v-if="EncMode == 'Next'"
+        id="ForceTraditional"
+        checked-icon="translate--rounded"
+        style="align-self: center; justify-self: left"
+        @change="ControlTraditional"
+      ></mdui-switch>
+      <span
         v-if="EncMode == 'Normal'"
         style="align-self: center; justify-self: right; margin-right: 0px"
         >雪藏话语</span
@@ -728,6 +890,58 @@ onBeforeUnmount(() => {});
         style="align-self: center; justify-self: left"
         @change="ControlEncq"
       ></mdui-switch>
+    </div>
+  </Card>
+  <Card id="GeekCard" v-if="Geeker">
+    <div id="MainContainer">
+      <p
+        style="
+          position: relative;
+          width: fit-content;
+          height: fit-content;
+          top: 0px;
+          font-size: 1rem;
+          font-variant: petite-caps;
+          text-align: left;
+          padding: 6px;
+          border-radius: inherit;
+          margin: 0px;
+        "
+      >
+        Geek Inspector
+      </p>
+      <mdui-button-icon
+        icon="close--rounded"
+        style="
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          background: rgb(11 11 11 / 25%);
+          backdrop-filter: blur(2px);
+          z-index: 1000;
+          zoom: 82%;
+        "
+        @click="Geeker = false"
+      ></mdui-button-icon>
+      <mdui-list>
+        <mdui-list-item rounded>
+          密钥轮
+          <span slot="description" class="small">
+            {{ Rounds[0] }}<br />
+            {{ Rounds[1] }}<br />
+            {{ Rounds[2] }}<br />
+            {{ Rounds[3] }}<br />
+            {{ Rounds[4] }}<br />
+            {{ Rounds[5] }}<br />
+          </span>
+        </mdui-list-item>
+        <mdui-list-item rounded>
+          步骤 - {{ Status }}
+          <span slot="description" class="small">
+            {{ StepData }}
+          </span>
+        </mdui-list-item>
+      </mdui-list>
     </div>
   </Card>
   <div id="PositionOccupie"></div>

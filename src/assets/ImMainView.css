@@ -62,6 +62,10 @@
     background-size: cover;
     background-position: -340px;
   }
+  .small {
+    zoom: 76.5%;
+    line-break: anywhere;
+  }
   #MagicBadge {
     position: absolute;
     display: grid;
@@ -85,7 +89,7 @@
   }
   #FloatCard {
     width: 390px;
-    height: 50px;
+    height: 90px;
     background: rgb(41, 50, 60);
     position: relative;
     justify-self: center;
@@ -94,6 +98,23 @@
     background: rgb(10 2 21 / 60%);
     backdrop-filter: blur(4px);
     box-shadow: 0px 6px 20px 0px rgb(0 0 0 / 66%);
+    z-index: 60;
+  }
+  #GeekCard {
+    width: 390px;
+    height: 100%;
+    background: rgb(41, 50, 60);
+    position: relative;
+    justify-self: center;
+    z-index: 50;
+    top: 150px;
+    background: rgb(10 2 21 / 60%);
+    backdrop-filter: blur(4px);
+    box-shadow: 0px 6px 20px 0px rgb(0 0 0 / 66%);
+    transition: all cubic-bezier(0.075, 0.82, 0.165, 1);
+  }
+  .oldfloat {
+    height: 50px !important;
   }
   #CryptControl {
     display: grid;
@@ -122,6 +143,9 @@
     background: url("./bg.webp");
     background-size: cover;
     background-position: center;
+  }
+  .small {
+    line-break: anywhere;
   }
   #MagicBadge {
     position: absolute;
@@ -153,14 +177,32 @@
   }
   #FloatCard {
     width: 150px;
-    height: 130px;
+    height: 170px;
     position: relative;
     float: right;
     left: calc(80% - 520px);
-    top: -80px;
+    top: -110px;
     background: rgb(10 2 21 / 60%);
     backdrop-filter: blur(4px);
     box-shadow: 0px 6px 20px 0px rgb(0 0 0 / 66%);
+    z-index: 60;
+  }
+  #GeekCard {
+    width: 550px;
+    height: 100%;
+    position: relative;
+    float: right;
+    left: calc(80% - 520px);
+    top: -90px;
+    z-index: 50;
+    background: rgb(10 2 21 / 60%);
+    backdrop-filter: blur(4px);
+    box-shadow: 0px 6px 20px 0px rgb(0 0 0 / 66%);
+    transition: all cubic-bezier(0.075, 0.82, 0.165, 1);
+  }
+  .oldfloat {
+    height: 130px !important;
+    top: -80px !important;
   }
   #CryptControl {
     display: grid;
