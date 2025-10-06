@@ -26,6 +26,8 @@ const ForceEncq = ref(false);
 const ForcePian = ref(false);
 const ForceLogi = ref(false);
 const ForceNoMark = ref(false);
+const ForceTraditional = ref(false);
+const Geeker = ref(false);
 const FileCardColor = ref("#5b6169");
 var dropzoneActive = false;
 var filess = ref(new Array());
@@ -188,6 +190,14 @@ function ControlNoMark() {
   }
 }
 
+function ControlTraditional() {
+  if (document.getElementById("ForceTraditional").checked == true) {
+    ForceTraditional.value = true;
+  } else {
+    ForceTraditional.value = false;
+  }
+}
+
 async function Switch() {
   if (EncMode.value == "Normal") {
     document.getElementById("NormalControlBar").style.display = "none";
@@ -216,6 +226,7 @@ async function ProcessGo() {
           message: "没有填写魔咒，自动使用默认魔咒",
           autoCloseDelay: 1500
         });
+        document.getElementById("KeyCard").value = "ABRACADABRA";
       } else {
         key = document.getElementById("KeyCard").value;
       }
@@ -240,6 +251,7 @@ async function ProcessGo() {
           message: "没有填写魔咒，自动使用默认魔咒",
           autoCloseDelay: 1500
         });
+        document.getElementById("KeyCard").value = "ABRACADABRA";
       } else {
         key = document.getElementById("KeyCard").value;
       }
@@ -290,6 +302,7 @@ async function ProcessEncNext() {
           message: "没有填写魔咒，自动使用默认魔咒",
           autoCloseDelay: 1500
         });
+        document.getElementById("KeyCard").value = "ABRACADABRA";
       } else {
         key = document.getElementById("KeyCard").value;
       }
@@ -297,7 +310,8 @@ async function ProcessEncNext() {
         PunctuationMark: !ForceNoMark.value,
         RandomIndex: parseInt(document.querySelector("#Randomness").value),
         PianwenMode: ForcePian.value,
-        LogicMode: ForceLogi.value
+        LogicMode: ForceLogi.value,
+        Traditional: ForceTraditional.value
       });
     } else if (InputMode.value == "UINT8") {
       if (window.inputfile == undefined || window.inputfile == null) {
@@ -309,6 +323,7 @@ async function ProcessEncNext() {
           message: "没有填写魔咒，自动使用默认魔咒",
           autoCloseDelay: 1500
         });
+        document.getElementById("KeyCard").value = "ABRACADABRA";
       } else {
         key = document.getElementById("KeyCard").value;
       }
@@ -317,7 +332,8 @@ async function ProcessEncNext() {
         PunctuationMark: !ForceNoMark.value,
         RandomIndex: parseInt(document.querySelector("#Randomness").value),
         PianwenMode: ForcePian.value,
-        LogicMode: ForceLogi.value
+        LogicMode: ForceLogi.value,
+        Traditional: ForceTraditional.value
       });
     }
     if (OutputMode.value == "TEXT") {
@@ -354,6 +370,7 @@ async function ProcessDecNext() {
           message: "没有填写魔咒，自动使用默认魔咒",
           autoCloseDelay: 1500
         });
+        document.getElementById("KeyCard").value = "ABRACADABRA";
       } else {
         key = document.getElementById("KeyCard").value;
       }
@@ -368,6 +385,7 @@ async function ProcessDecNext() {
           message: "没有填写魔咒，自动使用默认魔咒",
           autoCloseDelay: 1500
         });
+        document.getElementById("KeyCard").value = "ABRACADABRA";
       } else {
         key = document.getElementById("KeyCard").value;
       }
@@ -586,7 +604,7 @@ onBeforeUnmount(() => {});
             margin: 0px;
           "
         >
-          Abracadabra V3.2.0<br /><a style="color: #637eff">Offline Build</a>
+          Abracadabra V3.2.5<br /><a style="color: #637eff">Offline Build</a>
         </p>
         <p
           style="
@@ -649,6 +667,18 @@ onBeforeUnmount(() => {});
         checked-icon="auto_awesome--rounded"
         style="align-self: center; justify-self: left"
         @change="ControlNoMark"
+      ></mdui-switch>
+      <span
+        v-if="EncMode == 'Next'"
+        style="align-self: center; justify-self: right; margin-right: 0px"
+        >繁體中文</span
+      >
+      <mdui-switch
+        v-if="EncMode == 'Next'"
+        id="ForceTraditional"
+        checked-icon="translate--rounded"
+        style="align-self: center; justify-self: left"
+        @change="ControlTraditional"
       ></mdui-switch>
       <span
         v-if="EncMode == 'Normal'"
