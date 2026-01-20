@@ -16,6 +16,7 @@ import "mdui/components/slider.js";
 import "mdui/components/list.js";
 import "mdui/components/list-item.js";
 import "mdui/components/list-subheader.js";
+import { getStep, timeUntilTotpExpiryFormatted } from "@/misc";
 
 import { Abracadabra } from "abracadabra-cn";
 
@@ -23,6 +24,7 @@ const InputMode = ref("TEXT");
 const OutputMode = ref("TEXT");
 const EncMode = ref("Next");
 const ShowPWAButton = ref(true);
+const AdvancedEnc = ref(false);
 const ForceEnc = ref(false);
 const ForceDec = ref(false);
 const ForceEncq = ref(false);
@@ -35,6 +37,13 @@ const Geeker = ref(false);
 const Rounds = ref(["No Data Available"]);
 const Status = ref("NONE");
 const StepData = ref("None");
+
+//高级加密
+const UseStrongIV = ref(false);
+const UsePBKDF2 = ref(false);
+const UseHMAC = ref(false);
+const UseTOTP = ref(false);
+const TOTPEpoch = ref(0);
 
 const ExecuteCounter = ref(0);
 
@@ -60,6 +69,24 @@ watch(
     window.inputfile = newFile;
   }
 );
+
+watch(Geeker, () => {
+  setTimeout(() => {
+    document.getElementById("ImWindowContainer").style.height = "100.1%";
+    setTimeout(() => {
+      document.getElementById("ImWindowContainer").style.height = "100%";
+    }, 500);
+  }, 1000);
+});
+
+watch(AdvancedEnc, () => {
+  setTimeout(() => {
+    document.getElementById("ImWindowContainer").style.height = "100.1%";
+    setTimeout(() => {
+      document.getElementById("ImWindowContainer").style.height = "100%";
+    }, 500);
+  }, 1000);
+});
 
 function fileToUint8Array(file) {
   return new Promise((resolve, reject) => {
@@ -164,6 +191,10 @@ function ControlEnc() {
       ForceLogi.value = false;
       ForcePian.value = false;
     }
+
+    ControlAdvancedEnc();
+    ControlNoMark();
+    ControlTraditional();
   } else {
     if (document.getElementById("ForceEnc").checked == true) {
       document.getElementById("ForceDec").disabled = true;
@@ -183,6 +214,128 @@ function ControlEnc() {
       ForceEnc.value = false;
       ForceDec.value = false;
     }
+  }
+}
+async function ControlAdvancedEnc() {
+  if (document.getElementById("AdvancedEnc").checked == true) {
+    AdvancedEnc.value = true;
+  } else {
+    AdvancedEnc.value = false;
+    UsePBKDF2.value = false;
+    UseHMAC.value = false;
+    UseTOTP.value = false;
+  }
+  if (!AdvancedEnc.value) {
+    try {
+      clearInterval(TOTPExpiry);
+    } catch (err) {
+      return;
+    }
+    return;
+  }
+  await nextTick();
+  if (EncMode.value == "Next") {
+    if (document.getElementById("UsePBKDF2").checked == false) {
+      document.getElementById("UseTOTP").disabled = true;
+      document.getElementById("UseTOTP").checked = false;
+      UsePBKDF2.value = false;
+      UseTOTP.value = false;
+    } else if (document.getElementById("UsePBKDF2").checked == true) {
+      document.getElementById("UseTOTP").disabled = false;
+      UsePBKDF2.value = true;
+    }
+  }
+  try {
+    if (document.getElementById("UseStrongIV").checked == true) {
+      UseStrongIV.value = true;
+    } else {
+      UseStrongIV.value = false;
+    }
+    if (document.getElementById("UseHMAC").checked == true) {
+      UseHMAC.value = true;
+    } else {
+      UseHMAC.value = false;
+    }
+    if (document.getElementById("UsePBKDF2").checked == true) {
+      UsePBKDF2.value = true;
+    } else {
+      UsePBKDF2.value = false;
+    }
+    if (document.getElementById("UseTOTP").checked == true) {
+      UseTOTP.value = true;
+      await nextTick();
+      let slider2 = document.querySelector("#TOTPTimeStep");
+      slider2.labelFormatter = (value) => {
+        if (value == 0) {
+          return "3分钟";
+        } else if (value == 1) {
+          return "5分钟";
+        } else if (value == 2) {
+          return "10分钟";
+        } else if (value == 3) {
+          return "30分钟";
+        } else if (value == 4) {
+          return "2小时";
+        } else if (value == 5) {
+          return "6小时";
+        } else if (value == 6) {
+          return "12小时";
+        } else if (value == 7) {
+          return "1天";
+        } else if (value == 8) {
+          return "3天";
+        } else if (value == 9) {
+          return "5天";
+        } else if (value == 10) {
+          return "1周";
+        } else if (value == 11) {
+          return "3周";
+        } else if (value == 12) {
+          return "1个月";
+        } else if (value == 13) {
+          return "2个月";
+        } else if (value == 14) {
+          return "6个月";
+        } else if (value == 15) {
+          return "1年";
+        }
+        return "";
+      };
+      var TOTPExpiry = setInterval(function () {
+        try {
+          if (document.getElementById("TOTPEpoch").value == "") {
+            TOTPEpoch.value = Date.now();
+          } else {
+            TOTPEpoch.value = parseInt(document.getElementById("TOTPEpoch").value);
+          }
+          let Text = timeUntilTotpExpiryFormatted(
+            TOTPEpoch.value,
+            getStep(parseInt(document.getElementById("TOTPTimeStep").value))
+          );
+          if (Text == "0") {
+            document.getElementById("TOTPExpiryPrefix").innerText = "Already Expired";
+            document.getElementById("TOTPExpiry").innerText = "";
+          } else if (Text == "-1") {
+            document.getElementById("TOTPExpiryPrefix").innerText = "Not Yet Effective";
+            document.getElementById("TOTPExpiry").innerText = "";
+          } else {
+            document.getElementById("TOTPExpiryPrefix").innerText = "Expires in ";
+            document.getElementById("TOTPExpiry").innerText = Text;
+          }
+        } catch (err) {
+          clearInterval(TOTPExpiry);
+          return;
+        }
+      }, 100);
+    } else {
+      UseTOTP.value = false;
+    }
+  } catch (err) {
+    UseStrongIV.value = false;
+    UseHMAC.value = false;
+    UsePBKDF2.value = false;
+    UseTOTP.value = false;
+    return;
   }
 }
 function ControlEncq() {
@@ -218,6 +371,7 @@ async function Switch() {
     document.getElementById("NextControlBar").style.display = "none";
     EncMode.value = "Normal";
   }
+  Geeker.value = false;
   await nextTick();
   ControlEnc();
 }
@@ -329,6 +483,22 @@ async function ProcessEncNext() {
             LogicMode: ForceLogi.value,
             Traditional: ForceTraditional.value
           },
+          {
+            Enable: AdvancedEnc.value,
+            UseStrongIV: UseStrongIV.value,
+            UseHMAC: UseHMAC.value,
+            UsePBKDF2: UsePBKDF2.value,
+            UseTOTP: UseTOTP.value,
+            TOTPTimeStep: parseInt(
+              UseTOTP.value ? document.getElementById("TOTPTimeStep").value : 4
+            ),
+            TOTPBaseKey: UseTOTP.value
+              ? document.getElementById("TOTPBasekey").value == ""
+                ? key
+                : document.getElementById("TOTPBasekey").value
+              : undefined,
+            TOTPEpoch: TOTPEpoch.value
+          },
           Geeker.value === true ? GeekCallback : null
         );
         resolve();
@@ -412,6 +582,16 @@ async function ProcessDecNext() {
           "DECRYPT",
           key,
           null,
+          AdvancedEnc.value
+            ? {
+                TOTPBaseKey: UseTOTP.value
+                  ? document.getElementById("TOTPBasekey").value == ""
+                    ? key
+                    : document.getElementById("TOTPBasekey").value
+                  : undefined,
+                TOTPEpoch: UseTOTP.value ? TOTPEpoch.value : Date.now()
+              }
+            : undefined,
           Geeker.value === true ? GeekCallback : null
         );
         resolve();
@@ -771,7 +951,7 @@ onBeforeUnmount(() => {});
             margin: 0px;
           "
         >
-          Abracadabra V3.2.5<br /><a style="color: #637eff">Offline Build</a>
+          Abracadabra V3.3.0<br /><a style="color: #637eff">Offline Build</a>
         </p>
         <p
           id="CopyRightSheepChef"
@@ -802,6 +982,19 @@ onBeforeUnmount(() => {});
   </Card>
   <Card id="FloatCard" :class="{ oldfloat: EncMode == 'Normal' }">
     <div id="CryptControl">
+      <span
+        v-if="EncMode == 'Next'"
+        style="align-self: center; justify-self: right; margin-right: 0px"
+        >高级加密</span
+      >
+      <mdui-switch
+        v-if="EncMode == 'Next'"
+        id="AdvancedEnc"
+        style="align-self: center; justify-self: left"
+        unchecked-icon="lock_open--rounded"
+        checked-icon="lock--rounded"
+        @change="ControlAdvancedEnc"
+      ></mdui-switch>
       <span
         v-if="EncMode == 'Next'"
         style="align-self: center; justify-self: right; margin-right: 0px"
@@ -890,6 +1083,145 @@ onBeforeUnmount(() => {});
         style="align-self: center; justify-self: left"
         @change="ControlEncq"
       ></mdui-switch>
+    </div>
+  </Card>
+  <Card id="AdvancedEncCard" v-if="AdvancedEnc && EncMode == 'Next'">
+    <div id="MainContainer">
+      <p
+        style="
+          position: relative;
+          width: fit-content;
+          height: fit-content;
+          top: 0px;
+          font-size: 1rem;
+          font-variant: petite-caps;
+          text-align: left;
+          padding: 6px;
+          border-radius: inherit;
+          margin: 0px;
+        "
+      >
+        Advanced Encryption
+      </p>
+      <div
+        id="AdvancedEncSwitchContainer"
+        style="
+          width: 216px;
+          display: grid;
+          grid-template-columns: 25% 25% 25% 25% 25% 25% 25% 25%;
+          scale: 0.82;
+          column-gap: 2px;
+          margin-top: 0px;
+          align-content: center;
+          font-size: 13px;
+          margin-left: -20px;
+        "
+      >
+        <span
+          v-if="EncMode == 'Next'"
+          style="align-self: center; justify-self: right; margin-right: 0px"
+          >完整IV</span
+        >
+        <mdui-switch
+          v-if="EncMode == 'Next'"
+          id="UseStrongIV"
+          style="align-self: center; justify-self: left"
+          unchecked-icon="lock_open--rounded"
+          checked-icon="lock--rounded"
+          @change="ControlAdvancedEnc"
+        ></mdui-switch>
+        <span
+          v-if="EncMode == 'Next'"
+          style="align-self: center; justify-self: right; margin-right: 0px"
+          >HMAC</span
+        >
+        <mdui-switch
+          v-if="EncMode == 'Next'"
+          id="UseHMAC"
+          style="align-self: center; justify-self: left"
+          unchecked-icon="lock_open--rounded"
+          checked-icon="lock--rounded"
+          @change="ControlAdvancedEnc"
+        ></mdui-switch>
+        <span
+          v-if="EncMode == 'Next'"
+          style="align-self: center; justify-self: right; margin-right: 0px"
+          >KDF</span
+        >
+        <mdui-switch
+          v-if="EncMode == 'Next'"
+          id="UsePBKDF2"
+          style="align-self: center; justify-self: left"
+          unchecked-icon="lock_open--rounded"
+          checked-icon="lock--rounded"
+          @change="ControlAdvancedEnc"
+        ></mdui-switch>
+        <span
+          v-if="EncMode == 'Next'"
+          style="align-self: center; justify-self: right; margin-right: 0px"
+          >TOTP</span
+        >
+        <mdui-switch
+          v-if="EncMode == 'Next'"
+          id="UseTOTP"
+          unchecked-icon="lock_open--rounded"
+          checked-icon="lock_clock--rounded"
+          style="align-self: center; justify-self: left"
+          @change="ControlAdvancedEnc"
+        ></mdui-switch>
+      </div>
+
+      <mdui-slider
+        v-if="UseTOTP"
+        id="TOTPTimeStep"
+        step="1"
+        value="4"
+        min="0"
+        max="15"
+        style="
+          background: #0000003b;
+          padding: 0 15px;
+          width: 215px;
+          margin-left: 12px;
+          border-radius: 25px;
+          height: 35px;
+        "
+      ></mdui-slider>
+      <span
+        style="
+          position: relative;
+          width: fit-content;
+          height: fit-content;
+          top: 0px;
+          font-size: 0.1rem;
+          font-variant: petite-caps;
+          text-align: left;
+          padding: 6px;
+          border-radius: inherit;
+          margin: 19px;
+        "
+        v-if="UseTOTP"
+        ><span id="TOTPExpiryPrefix">Expires in </span><span id="TOTPExpiry">NaN</span></span
+      >
+      <mdui-text-field
+        v-if="UseTOTP"
+        id="TOTPEpoch"
+        type="number"
+        variant="outlined"
+        rows="1"
+        :label="'TOTP Epoch ' + TOTPEpoch"
+        placeholder="留空为现在时间戳"
+        style="grid-column: span 3; align-self: center; width: 100%; scale: 0.7"
+      ></mdui-text-field>
+      <mdui-text-field
+        v-if="UseTOTP"
+        id="TOTPBasekey"
+        variant="outlined"
+        rows="1"
+        label="TOTP Basekey"
+        placeholder="留空为加密密钥"
+        style="grid-column: span 3; align-self: center; width: 100%; scale: 0.7"
+      ></mdui-text-field>
     </div>
   </Card>
   <Card id="GeekCard" v-if="Geeker">
