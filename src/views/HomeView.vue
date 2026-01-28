@@ -786,7 +786,7 @@ onBeforeUnmount(() => {});
             margin: 0px;
           "
         >
-          Abracadabra V3.3.0<br /><a style="color: #637eff">Offline Build</a>
+          Abracadabra V3.3.1<br /><a style="color: #637eff">Offline Build</a>
         </p>
         <p
           style="
@@ -1021,7 +1021,7 @@ onBeforeUnmount(() => {});
             width: fit-content;
             height: fit-content;
             top: 0px;
-            font-size: 0.1rem;
+            font-size: 0.8rem;
             font-variant: petite-caps;
             text-align: left;
             border-radius: inherit;
