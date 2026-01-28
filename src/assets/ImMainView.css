@@ -26,6 +26,9 @@
     transform: rotate(360deg);
   }
 }
+mdui-dialog::part(icon) {
+  font-size: 3rem;
+}
 @keyframes fade-in-out {
   0% {
     opacity: 1;
