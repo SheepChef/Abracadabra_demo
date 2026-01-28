@@ -16,6 +16,7 @@ import "mdui/components/slider.js";
 import "mdui/components/list.js";
 import "mdui/components/list-item.js";
 import "mdui/components/list-subheader.js";
+import { dialog } from "mdui/functions/dialog.js";
 import { getStep, timeUntilTotpExpiryFormatted } from "@/misc";
 
 import { Abracadabra } from "abracadabra-cn";
@@ -164,7 +165,17 @@ function handleFiles(files) {
     // 在这里可以执行文件上传的相关操作
   }
 }
-
+function getCookie(cname) {
+  var name = cname + "=";
+  var ca = document.cookie.split(";");
+  for (var i = 0; i < ca.length; i++) {
+    var c = ca[i].trim();
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
 const isPWA = () => {
   const displayModes = ["fullscreen", "standalone", "minimal-ui"];
   const matchesPwa = displayModes.some(
@@ -470,6 +481,30 @@ async function ProcessEncNext() {
         document.getElementById("KeyCard").value = "ABRACADABRA";
       } else {
         key = document.getElementById("KeyCard").value;
+      }
+      if (key == "ABRACADABRA") {
+        if (AdvancedEnc.value && getCookie("AdvancedEncWeakPasswordIgnore") != "true") {
+          dialog({
+            headline: "弱密码",
+            description:
+              "您正尝试使用默认密钥执行高级加密，这将导致高级加密失去意义。在使用高级加密时，强烈建议您使用一个足够强的加密密钥。",
+            icon: "gpp_maybe--rounded",
+            actions: [
+              {
+                text: "不再提示",
+                onClick: () => {
+                  document.cookie = "AdvancedEncWeakPasswordIgnore=true";
+                  return true;
+                }
+              }
+            ]
+          });
+        } else {
+          snackbar({
+            message: "正在使用默认密钥，这可简化解密流程，但不安全。",
+            autoCloseDelay: 1500
+          });
+        }
       }
       await new Promise((resolve) => {
         Abra.WenyanInput(
@@ -951,7 +986,7 @@ onBeforeUnmount(() => {});
             margin: 0px;
           "
         >
-          Abracadabra V3.3.0<br /><a href="https://github.com/SheepChef/Abracadabra">Github Repo</a>
+          Abracadabra V3.3.1<br /><a href="https://github.com/SheepChef/Abracadabra">Github Repo</a>
         </p>
         <mdui-chip
           v-if="ShowPWAButton"
@@ -1207,7 +1242,7 @@ onBeforeUnmount(() => {});
           width: fit-content;
           height: fit-content;
           top: 0px;
-          font-size: 0.1rem;
+          font-size: 0.9rem;
           font-variant: petite-caps;
           text-align: left;
           padding: 6px;

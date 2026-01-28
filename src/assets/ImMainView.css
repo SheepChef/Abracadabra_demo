@@ -37,7 +37,9 @@
     opacity: 1;
   }
 }
-
+mdui-dialog::part(icon) {
+  font-size: 3rem;
+}
 @media screen and (max-width: 380px) {
   body {
     background: url("./bg.webp");
