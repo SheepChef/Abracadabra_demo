@@ -596,10 +596,26 @@ async function ProcessDecNext() {
   ExecuteCounter.value++;
   let Abra = new Abracadabra(InputMode.value, OutputMode.value);
   let key;
+
   try {
     if (InputMode.value == "TEXT") {
       if (document.getElementById("InputCard").value == "") {
         return;
+      }
+      if (document.getElementById("InputCard").value[0] == "呋") {
+        try {
+          Abra.BearDecode(document.getElementById("InputCard").value);
+          document.getElementById("OutputText").value = Abra.Output();
+
+          snackbar({
+            message: "识别到熊曰密文，已成功解密。",
+            autoCloseDelay: 1500
+          });
+
+          return;
+        } catch (err) {
+          //Do Nothing
+        }
       }
       if (document.getElementById("KeyCard").value == "") {
         key = "ABRACADABRA";
