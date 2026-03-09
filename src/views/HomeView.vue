@@ -535,6 +535,21 @@ async function ProcessDecNext() {
       if (document.getElementById("InputCard").value == "") {
         return;
       }
+      if (document.getElementById("InputCard").value[0] == "呋") {
+        try {
+          Abra.BearDecode(document.getElementById("InputCard").value);
+          document.getElementById("OutputText").value = Abra.Output();
+
+          snackbar({
+            message: "成功解密熊曰密文",
+            autoCloseDelay: 1500
+          });
+
+          return;
+        } catch (err) {
+          //Do Nothing
+        }
+      }
       if (document.getElementById("KeyCard").value == "") {
         key = "ABRACADABRA";
         snackbar({
@@ -786,7 +801,7 @@ onBeforeUnmount(() => {});
             margin: 0px;
           "
         >
-          Abracadabra V3.3.1<br /><a style="color: #637eff">Offline Build</a>
+          Abracadabra V3.3.3<br /><a style="color: #637eff">Offline Build</a>
         </p>
         <p
           style="
