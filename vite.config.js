@@ -44,7 +44,7 @@ manifest.version_name = `${manifest.version} (${buildHash})`;
 if (buildTarget === 'firefox-ext') {
   manifest.browser_specific_settings = {
     gecko: {
-      id: "e8e23a64-d3a0-47e2-839f-0bdf6eabc596",
+      id: "{e8e23a64-d3a0-47e2-839f-0bdf6eabc596}",
       strict_min_version: "109.0"
     }
   };
