@@ -24,7 +24,7 @@ export function timeUntilTotpExpiryFormatted(genEpoch, timestep, nowEpoch, optio
 
   // normalize to seconds
   const genSec = genEpoch / 1000;
-  const nowSec = typeof nowEpoch === "number" ? nowEpoch / 1000 : Math.floor(Date.now() / 1000);
+  const nowSec = typeof nowEpoch === "number" ? nowEpoch / 1000 : Date.now() / 1000;
 
   // 计算该 genSec 所在 counter 的下一次过期时间（单位：秒）
   const counter = Math.floor(genSec / timestep);
@@ -65,7 +65,7 @@ export function timeUntilTotpExpiryFormatted(genEpoch, timestep, nowEpoch, optio
   parts.minutes = Math.floor(remaining / MIN);
   remaining -= parts.minutes * MIN;
 
-  parts.seconds = remaining; // already integer
+  parts.seconds = Math.floor(remaining);
 
   // Build formatted string respecting maxUnits and compact option
   const unitsOrder = [

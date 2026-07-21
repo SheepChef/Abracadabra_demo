@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="cc.sheepchef.abra" version="3.5.0" android-versionCode="350" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+    <name>魔曰</name>
+    <description>
+        对文字施以神秘魔法。
+    </description>
+    <author email="i@halu.ca" href="https://shef.cc">
+        SheepChef
+    </author>
+    <content src="index.html" />
+    <allow-intent href="http://*/*" />
+    <allow-intent href="https://*/*" />
+    <platform name="android">
+        <icon src="res/favicon.png" />
+        <preference name="android-minSdkVersion" value="28" />
+        <preference name="android-targetSdkVersion" value="33" />
+        <preference name="android-compileSdkVersion" value="36" />
+        <preference name="AndroidWindowSplashScreenAnimatedIcon" value="res/favicon.png" />
+        <preference name="AndroidWindowSplashScreenBackground" value="#1d0061ff" />
+        <edit-config file="app/src/main/AndroidManifest.xml" mode="remove" target="/manifest/uses-permission[@android:name='android.permission.INTERNET']" />
+        <config-file target="AndroidManifest.xml" parent="/manifest">
+            <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+            <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+            <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+            <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+        </config-file>
+    </platform>
+</widget>

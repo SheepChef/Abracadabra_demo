@@ -1,0 +1,96 @@
+/* Chrome Extension Specific Overrides */
+
+/* Fixed Popup Dimensions & Reset */
+body.crx-popup {
+  width: 760px;
+  height: 580px;
+  margin: 0;
+  overflow: hidden;
+}
+
+body.crx-popup .page-wrapper {
+  padding: 0 !important;
+  margin: 0 !important;
+  height: 100vh !important;
+  max-width: none !important;
+  gap: 0 !important;
+}
+
+/* Redefine Grid */
+body.crx-popup .m3-dashboard {
+  grid-template-columns: 280px 1fr !important;
+  gap: 0 !important;
+  padding: 0 !important;
+  height: 100vh !important;
+}
+
+/* Hide Unused Elements */
+body.crx-popup .m3-col-right,
+body.crx-popup .app-footer {
+  display: none !important;
+}
+
+/* Prevent middle column from scrolling to keep copyright at bottom */
+body.crx-popup .m3-col-middle,
+body.crx-popup .m3-col-left {
+  gap: 0 !important;
+  height: 100vh !important;
+  overflow-y: auto !important;
+}
+
+/* Completely hide all scrollbars for a clean, flush UI in the popup */
+body.crx-popup * {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+body.crx-popup *::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Strip Border Radius only for specific main structural cards */
+body.crx-popup .m3-col-left .config-card,
+body.crx-popup .m3-col-middle .main-card {
+  --m3e-card-shape: 0px !important;
+  border-radius: 0 !important;
+}
+
+body.crx-popup .m3-card,
+body.crx-popup .config-card,
+body.crx-popup .main-card,
+body.crx-popup m3e-card {
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Add dividing line between left menu and right content */
+body.crx-popup .main-card {
+  border-left: 1px solid var(--md-sys-color-outline-variant) !important;
+}
+
+body.crx-popup .m3-col-left {
+  border-radius: 0;
+}
+
+/* Version Flap Card straight corners and sticky bottom */
+body.crx-popup .version-flap-card {
+  border-radius: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  flex-shrink: 0 !important;
+  position: sticky !important;
+  bottom: 0 !important;
+  z-index: 10 !important;
+  padding: 2px 25px 0px 30px;
+}
+
+/* Make Config Header Uncollapsible by overriding cursor & removing chevron */
+body.crx-popup .config-header {
+  pointer-events: none;
+}
+
+body.crx-popup .config-header .chevron-icon {
+  display: none !important;
+}

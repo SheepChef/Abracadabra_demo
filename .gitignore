@@ -11,6 +11,9 @@ node_modules
 .DS_Store
 #dist
 #dist-ssr
+dist-chrome
+dist-firefox
+dist-android
 coverage
 *.local
 
