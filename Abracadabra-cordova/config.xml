@@ -17,6 +17,7 @@
         <preference name="android-compileSdkVersion" value="36" />
         <preference name="AndroidWindowSplashScreenAnimatedIcon" value="res/favicon.png" />
         <preference name="AndroidWindowSplashScreenBackground" value="#1d0061ff" />
+        <preference name="tp-text-zoom" value="100" />
         <edit-config file="app/src/main/AndroidManifest.xml" mode="remove" target="/manifest/uses-permission[@android:name='android.permission.INTERNET']" />
         <config-file target="AndroidManifest.xml" parent="/manifest">
             <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />

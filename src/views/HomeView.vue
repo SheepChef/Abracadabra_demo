@@ -723,11 +723,13 @@ onMounted(() => {
     }
   });
 
+  //如果在插件环境下，那么强行注入插件的类名，以变更页面样式。
   if (isExtension) {
     document.body.classList.add('crx-popup');
     ConfigCollapsed.value = false;
   }
 
+  //Resize事件，用于在窄屏下将配置面板设为可折叠。在宽屏模式下自动展开。
   window.addEventListener("resize", handleResize);
   if (isPWA()) {
     ShowPWAButton.value = false;
@@ -816,7 +818,7 @@ onUnmounted(() => {
                     icons="both"></m3e-switch>
                 </div>
                 <div class="setting-row">
-                  <span>正體中文</span>
+                  <span>繁體中文</span>
                   <m3e-switch id="swOutputTraditional" :checked="OutputTraditional ? true : undefined"
                     @change="onChangeTraditional" icons="both"></m3e-switch>
                 </div>
@@ -1167,7 +1169,7 @@ onUnmounted(() => {
                     </m3e-form-field>
 
                     <m3e-icon-button v-if="isExtension" variant="tonal" @click="copyall"
-                      style="position: absolute; bottom: 32px; right: 12px; z-index: 10; opacity: 0.85; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);">
+                      style="position: absolute; bottom: 32px; right: 12px; z-index: 10; opacity: 0.85;">
                       <m3e-icon name="content_copy"></m3e-icon>
                     </m3e-icon-button>
                   </m3e-skeleton>
