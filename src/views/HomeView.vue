@@ -134,6 +134,44 @@ function onRandomness(e) { RandomnessVal.value = Number(e.target.value); }
 function onTOTPStep(e) { TOTPTimeStepVal.value = Number(e.target.value); }
 
 
+//允许用户直接复制密码，密码允许输入中文
+function PasswordCopy(e) {
+  e.preventDefault();
+  let cryptoInput = e.target;
+  const selectedRealText = cryptoInput.value.substring(cryptoInput.selectionStart, cryptoInput.selectionEnd);
+  if (e.clipboardData) {
+    e.clipboardData.setData('text/plain', selectedRealText);
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(selectedRealText);
+  }
+}
+function PasswordCut(e) {
+
+  e.preventDefault();
+  let cryptoInput = e.target;
+  const start = cryptoInput.selectionStart;
+  const end = cryptoInput.selectionEnd;
+
+  // 如果没有选中文本，直接什么都不做
+  if (start === end) return;
+
+  // 1. 拿到真实的明文
+  const selectedRealText = cryptoInput.value.substring(start, end);
+
+  // 2. 写入剪贴板
+  if (e.clipboardData) {
+    e.clipboardData.setData('text/plain', selectedRealText);
+  }
+
+  // 3. 手动删除被剪切的文本，拼接前后的内容
+  cryptoInput.value = cryptoInput.value.substring(0, start) + cryptoInput.value.substring(end);
+
+  // 4. 将光标恢复到剪切发生的位置
+  cryptoInput.setSelectionRange(start, start);
+
+  // 5. 极其重要：手动触发 input 事件，告知外部（如 Vue/React）值变了
+  cryptoInput.dispatchEvent(new Event('input', { bubbles: true }));
+}
 
 // 终极等待渲染完成的辅助函数
 const waitForRender = () => {
@@ -1051,8 +1089,9 @@ onUnmounted(() => {
             <div style="margin-bottom:16px;">
               <m3e-form-field variant="outlined" style="width:100%;" hide-subscript="always">
                 <label slot="label">密钥</label>
-                <input placeholder="将一切雪藏的密钥" autocomplete="off" :type="ShowPassword ? 'text' : 'password'"
-                  :value="KeyText" @input="KeyText = $event.target.value" />
+                <input placeholder="将一切雪藏的密钥" autocomplete="off"
+                  :class="ShowPassword ? 'masked-key show-text' : 'masked-key'" :type="'text'" :value="KeyText"
+                  @input="KeyText = $event.target.value" @copy="PasswordCopy" @cut="PasswordCut" />
                 <m3e-icon-button slot="suffix" @click="ShowPassword = !ShowPassword" type="button"
                   style="margin-right: 4px;">
                   <m3e-icon :name="!ShowPassword ? 'visibility_off' : 'visibility'"></m3e-icon>
@@ -1505,3 +1544,15 @@ onUnmounted(() => {
 
   </div>
 </template>
+
+<style scoped>
+/* 默认遮罩状态：匹配 type 为 text 且包含 masked-key 类的 input */
+input[type="text"].masked-key {
+  -webkit-text-security: disc;
+}
+
+/* 切换到明文状态：同时包含 masked-key 和 show-text 时生效 */
+input[type="text"].masked-key.show-text {
+  -webkit-text-security: none;
+}
+</style>
