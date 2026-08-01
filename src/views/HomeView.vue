@@ -670,6 +670,17 @@ function closeWeakPassword() {
 }
 function ignoreWeakPassword() { document.cookie = "AdvancedEncWeakPasswordIgnore=true"; closeWeakPassword(); }
 
+
+function showCompatibilityDialog() {
+  const d = document.getElementById("CompatibilityDialog");
+  if (d.hide) d.show(); else d.open = true;
+}
+
+function closeCompatibilityDialog() {
+  const d = document.getElementById("CompatibilityDialog");
+  if (d.hide) d.hide(); else d.open = false;
+}
+
 function showAboutDialog() {
   const d = document.getElementById("AboutDialog");
   if (d.show) d.show(); else d.open = true;
@@ -760,6 +771,16 @@ onMounted(() => {
       slider.shadowRoot.appendChild(style);
     }
   });
+
+  //部分浏览器环境不兼容
+  try{
+    var ua = navigator.userAgent.toLowerCase();
+    if (ua.indexOf('baiduboxapp') !== -1) {
+      showCompatibilityDialog();
+    }
+  }catch(err){
+    //Do Nothing.
+  }
 
   //如果在插件环境下，那么强行注入插件的类名，以变更页面样式。
   if (isExtension) {
@@ -1374,6 +1395,20 @@ onUnmounted(() => {
       <div slot="actions" end>
         <m3e-button variant="text" @click="ignoreWeakPassword">不再提示</m3e-button>
         <m3e-button variant="filled" @click="closeWeakPassword">明白</m3e-button>
+      </div>
+    </m3e-dialog>
+
+    <m3e-dialog id="CompatibilityDialog">
+      <div slot="header"
+        style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; gap: 12px; margin-bottom: 8px;">
+        <m3e-icon name="privacy_tip" style="font-size: 55px; color: var(--md-sys-color-primary);"></m3e-icon>
+        <span style="font-size: 24px;">兼容性警告</span>
+      </div>
+      <div>
+        当前浏览器环境可能导致页面显示异常，部分功能可能无法正常加载。建议您切换至 Chrome、Safari 等标准浏览器。
+      </div>
+      <div slot="actions" end>
+        <m3e-button variant="filled" @click="closeCompatibilityDialog">明白</m3e-button>
       </div>
     </m3e-dialog>
 
