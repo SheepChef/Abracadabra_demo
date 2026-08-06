@@ -774,12 +774,13 @@ onMounted(() => {
 
   //部分浏览器环境不兼容
   try{
-    var ua = navigator.userAgent.toLowerCase();
+    /*var ua = navigator.userAgent.toLowerCase();
     if (ua.indexOf('baiduboxapp') !== -1) {
       showCompatibilityDialog();
-    }
+    }*/
+    document.querySelector(':dir(ltr)'); //检查CSS语法兼容性
   }catch(err){
-    //Do Nothing.
+    showCompatibilityDialog();
   }
 
   //如果在插件环境下，那么强行注入插件的类名，以变更页面样式。
@@ -1404,8 +1405,8 @@ onUnmounted(() => {
         <m3e-icon name="privacy_tip" style="font-size: 55px; color: var(--md-sys-color-primary);"></m3e-icon>
         <span style="font-size: 24px;">兼容性警告</span>
       </div>
-      <div>
-        当前浏览器环境可能导致页面显示异常，部分功能可能无法正常加载。建议您切换至 Chrome、Safari 等标准浏览器。
+      <div style="line-break: anywhere;">
+        检测到兼容性问题。当前浏览器环境过旧，可能导致页面显示异常，部分功能可能无法正常加载。请您切换至基于 Chromium 120 或 Firefox 49 以上版本的现代浏览器。
       </div>
       <div slot="actions" end>
         <m3e-button variant="filled" @click="closeCompatibilityDialog">明白</m3e-button>
@@ -1535,9 +1536,14 @@ onUnmounted(() => {
             <span slot="supporting-text">©Siara-cc | Apache-2.0</span>
             <m3e-icon slot="trailing" name="open_in_new"></m3e-icon>
           </m3e-list-action>
-          <m3e-list-action href="https://github.com/brix/crypto-js" target="_blank" rel="noopener noreferrer">
-            crypto-js
-            <span slot="supporting-text">©Jeff Mott&Evan Vosberg | MIT</span>
+          <m3e-list-action href="https://github.com/paulmillr/noble-hashes" target="_blank" rel="noopener noreferrer">
+            noble-hashes
+            <span slot="supporting-text">©Paul Miller | MIT</span>
+            <m3e-icon slot="trailing" name="open_in_new"></m3e-icon>
+          </m3e-list-action>
+          <m3e-list-action href="https://github.com/paulmillr/noble-ciphers" target="_blank" rel="noopener noreferrer">
+            noble-ciphers
+            <span slot="supporting-text">©Paul Miller | MIT</span>
             <m3e-icon slot="trailing" name="open_in_new"></m3e-icon>
           </m3e-list-action>
           <m3e-list-action href="https://github.com/nodeca/pako" target="_blank" rel="noopener noreferrer">
@@ -1563,11 +1569,6 @@ onUnmounted(() => {
           <m3e-list-action href="https://github.com/yeojz/otplib" target="_blank" rel="noopener noreferrer">
             otplib
             <span slot="supporting-text">©Gerald Yeo | MIT</span>
-            <m3e-icon slot="trailing" name="open_in_new"></m3e-icon>
-          </m3e-list-action>
-          <m3e-list-action href="https://github.com/paulmillr/noble-hashes" target="_blank" rel="noopener noreferrer">
-            noble-hashes
-            <span slot="supporting-text">©Paul Miller | MIT</span>
             <m3e-icon slot="trailing" name="open_in_new"></m3e-icon>
           </m3e-list-action>
         </m3e-action-list>
