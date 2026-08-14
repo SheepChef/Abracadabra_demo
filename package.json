@@ -7,10 +7,11 @@
     "dev": "cross-env BUILD_TARGET=web NODE_OPTIONS=--max-old-space-size=4096 vite",
     "dev:crx": "cross-env BUILD_TARGET=chrome-ext NODE_OPTIONS=--max-old-space-size=4096 vite",
     "build": "cross-env BUILD_TARGET=web NODE_OPTIONS=--max-old-space-size=4096 vite build",
+    "build:singlefile": "cross-env BUILD_TARGET=singlefile vite build",
     "build:android": "cross-env BUILD_TARGET=android NODE_OPTIONS=--max-old-space-size=4096 vite build && cd Abracadabra-cordova && cordova build android --release --buildConfig=build.json -- --packageType=apk",
     "build:chrome": "cross-env BUILD_TARGET=chrome-ext NODE_OPTIONS=--max-old-space-size=4096 vite build",
     "build:firefox": "cross-env BUILD_TARGET=firefox-ext NODE_OPTIONS=--max-old-space-size=4096 vite build",
-    "build:all": "npm run build && npm run build:android && npm run build:chrome && npm run build:firefox",
+    "build:all": "npm run build && npm run build:singlefile && npm run build:android && npm run build:chrome && npm run build:firefox",
     "preview": "vite preview",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
     "format": "prettier --write src/",
@@ -18,7 +19,7 @@
   },
   "dependencies": {
     "@fontsource/roboto": "^5.2.10",
-    "@m3e/web": "^2.7.1",
+    "@m3e/web": "https://pkg.pr.new/@m3e/web@0f09df6",
     "@material-symbols/font-400": "^0.45.8",
     "@mdui/icons": "^1.0.4",
     "abracadabra-cn": "^3.5.0",
@@ -40,6 +41,7 @@
     "terser": "^5.31.1",
     "vite": "^5.0.10",
     "vite-plugin-compression": "^0.5.1",
-    "vite-plugin-pwa": "^0.21.0"
+    "vite-plugin-pwa": "^0.21.0",
+    "vite-plugin-singlefile": "^2.3.3"
   }
 }

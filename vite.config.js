@@ -10,6 +10,7 @@ import vue from "@vitejs/plugin-vue";
 import viteCompression from "vite-plugin-compression";
 import terser from "@rollup/plugin-terser";
 import { crx } from "@crxjs/vite-plugin";
+import { viteSingleFile } from "vite-plugin-singlefile";
 
 let configStore;
 let outDir = "";
@@ -24,6 +25,7 @@ const manifest = fs.existsSync(manifestPath) ? JSON.parse(fs.readFileSync(manife
 
 const buildTarget = process.env.BUILD_TARGET || 'web';
 const isExtension = buildTarget === 'chrome-ext' || buildTarget === 'firefox-ext';
+const isSingleFile = buildTarget === 'singlefile'; // [!新增] 判断是否为单文件构建
 
 // ================== Extension Versioning ==================
 // 扩展主要跟随 abracadabra-cn 核心版本号。
@@ -93,9 +95,10 @@ export default defineConfig({
     __IS_FIREFOX_EXT__: JSON.stringify(buildTarget === 'firefox-ext')
   },
   build: {
-    outDir: buildTarget === 'chrome-ext' ? 'dist-chrome' : buildTarget === 'firefox-ext' ? 'dist-firefox' : buildTarget === 'android' ? path.resolve(__dirname, 'Abracadabra-cordova/www') : 'docs',
+    outDir: buildTarget === 'chrome-ext' ? 'dist-chrome' : buildTarget === 'firefox-ext' ? 'dist-firefox' : buildTarget === 'android' ? path.resolve(__dirname, 'Abracadabra-cordova/www') : buildTarget === 'singlefile' ? 'dist-singlefile' : 'docs',
     minify: "terser",
     cssMinify: "esbuild",
+    assetsInlineLimit: isSingleFile ? (file) => true : 40960,
     rollupOptions: {
       plugins: [
         terser({
@@ -111,7 +114,7 @@ export default defineConfig({
         })
       ],
       output: {
-        manualChunks: (id) => {
+        manualChunks: buildTarget === 'singlefile' ? undefined : (id) => {
           if (id.includes("abracadabra-cn")) {
             return "abracadabra-cn";
           }
@@ -137,6 +140,9 @@ export default defineConfig({
     }),
     ...(isExtension ? [
       crx({ manifest })
+    ] : []),
+    ...(buildTarget === 'singlefile' ? [
+      viteSingleFile()
     ] : []),
     ...(buildTarget === 'web' ? [
       VitePWA({

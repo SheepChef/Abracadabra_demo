@@ -14,6 +14,7 @@ node_modules
 dist-chrome
 dist-firefox
 dist-android
+dist-singlefile
 coverage
 *.local
 

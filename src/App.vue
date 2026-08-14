@@ -24,7 +24,7 @@ provide("setThemeScheme", setThemeScheme);
 
 <template>
   <header>
-    <link rel="shortcut icon" href="favicon.ico" />
+    <link rel="shortcut icon" href="./assets/favicon.ico" />
   </header>
   <m3e-theme :color="themeColor" variant="vibrant" :scheme="themeScheme" motion="expressive"
     style="min-height: 100vh; display: block; ">
