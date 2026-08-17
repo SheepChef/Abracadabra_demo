@@ -773,15 +773,15 @@ onMounted(() => {
   });
 
   //部分浏览器环境不兼容
-  //try{
+  try{
     //var ua = navigator.userAgent.toLowerCase();
-    //if (CSS.supports('transition-behavior', 'allow-discrete') === false) {
-    //  showCompatibilityDialog();
-    //}
-    //document.querySelector(':dir(ltr)'); //检查CSS语法兼容性
-  //}catch(err){
-      //showCompatibilityDialog();
-  //}
+    document.querySelector(':dir(ltr)'); //检查CSS语法兼容性
+    if (CSS.supports('transition-behavior', 'allow-discrete') === false) {
+      showCompatibilityDialog();
+    }
+  }catch(err){
+      showCompatibilityDialog();
+  }
 
   //如果在插件环境下，那么强行注入插件的类名，以变更页面样式。
   if (isExtension) {
