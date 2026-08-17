@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@fontsource/roboto": "^5.2.10",
-    "@m3e/web": "https://pkg.pr.new/@m3e/web@0f09df6",
+    "@m3e/web": "^2.7.6",
     "@material-symbols/font-400": "^0.45.8",
     "@mdui/icons": "^1.0.4",
     "abracadabra-cn": "^3.5.0",
