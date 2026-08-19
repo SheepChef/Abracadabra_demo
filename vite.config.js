@@ -90,6 +90,7 @@ export default defineConfig({
     __BUILD_HASH__: JSON.stringify(generateSourceHash()),
     __CORE_VERSION__: JSON.stringify(coreVersion),
     __IS_ANDROID_APP__: JSON.stringify(buildTarget === 'android'),
+    __IS_SINGLEFILE__: JSON.stringify(isSingleFile),
     __IS_EXTENSION__: JSON.stringify(isExtension),
     __IS_CHROME_EXT__: JSON.stringify(buildTarget === 'chrome-ext'),
     __IS_FIREFOX_EXT__: JSON.stringify(buildTarget === 'firefox-ext')

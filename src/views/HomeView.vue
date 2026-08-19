@@ -9,6 +9,7 @@ const BuildDate = __BUILD_DATE__;
 const BuildHash = __BUILD_HASH__;
 const isAndroidApp = __IS_ANDROID_APP__;
 const isExtension = __IS_EXTENSION__;
+const isSingleFile = __IS_SINGLEFILE__;
 // ── Theme ───────────────────────────────────────────────────────────
 const themeColor = inject("themeColor");
 const themeScheme = inject("themeScheme");
@@ -733,6 +734,9 @@ function getStepLabel(v) {
 
 // ── PWA ─────────────────────────────────────────────────────────────
 const isPWA = () => {
+  if(isSingleFile){
+    return true;
+  }
   const displayModes = ["fullscreen", "standalone", "minimal-ui"];
   const matchesPwa = displayModes.some(
     (displayMode) => window.matchMedia("(display-mode: " + displayMode + ")").matches
