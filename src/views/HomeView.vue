@@ -513,7 +513,11 @@ async function ProcessEncNext() {
       OutputText.value = "文件加密处理已完成，正在自动下载。您也可以点击下方按钮重新下载。";
     }
   } catch (err) {
-    ErrorMessage.value = err.toString();
+    if(err.toString().indexOf("Unacceptable Payload Distribution Argument. \n    Minimal length should be higher than") != -1){
+      ErrorMessage.value = err.toString().replace("Unacceptable Payload Distribution Argument. \n    Minimal length should be higher than", "分段参数无效：每段最小长度必须大于 ");
+    }else{
+      ErrorMessage.value = err.toString();
+    }
   } finally {
     Loading.value = false;
   }
@@ -1066,11 +1070,11 @@ onUnmounted(() => {
                       <p class="config-section-label">分段参数</p>
                       <div class="sub-section">
                         <div class="setting-row sub-row">
-                          <span id="lblUseAONT">全有或全无 (AONT)</span>
+                          <span id="lblUseAONT">分段互锁(AONT)</span>
                           <m3e-switch id="swUseAONT" :checked="UseAONT ? true : undefined" @change="onChangeAONT"
                             icons="both"></m3e-switch>
                           <m3e-rich-tooltip v-if="EnableTooltips" for="lblUseAONT" hide-delay="200">
-                            <span slot="subhead" style="font-weight: bold;">全有或全无 (AONT)</span>
+                            <span slot="subhead" style="font-weight: bold;">分段互锁(AONT)</span>
                             必须收集齐所有片段才能解密出内容。
                           </m3e-rich-tooltip>
                         </div>
