@@ -65,11 +65,11 @@ jobs:
           - label: Chrome Extension
             command: build:chrome
             directory: dist-chrome
-            filename: Chrome
+            filename: ChromeExt
           - label: Firefox Extension
             command: build:firefox
             directory: dist-firefox
-            filename: Firefox
+            filename: FirefoxExt
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -81,19 +81,31 @@ jobs:
       - name: Verify output
         env:
           OUTPUT_DIR: ${{ matrix.directory }}
-        run: test -d "$OUTPUT_DIR" && test -n "$(find "$OUTPUT_DIR" -type f -print -quit)"
-      - name: Package output (root-level extension manifest)
+          BUILD_COMMAND: ${{ matrix.command }}
+        run: |
+          if [ "$BUILD_COMMAND" = 'build:singlefile' ]; then
+            test -s "$OUTPUT_DIR/index.html"
+          else
+            test -s "$OUTPUT_DIR/manifest.json"
+          fi
+      - name: Collect standalone HTML (no inner ZIP)
+        if: matrix.command == 'build:singlefile'
+        run: |
+          mkdir -p packages
+          cp dist-singlefile/index.html "packages/Abracadabra-SingleFile-${GITHUB_SHA::7}.html"
+      - name: Package browser extension
+        if: matrix.command != 'build:singlefile'
         env:
           OUTPUT_DIR: ${{ matrix.directory }}
           OUTPUT_NAME: ${{ matrix.filename }}
         run: |
           mkdir -p packages
           ( cd "$OUTPUT_DIR" && zip -qr "${GITHUB_WORKSPACE}/packages/Abracadabra-${OUTPUT_NAME}-${GITHUB_SHA::7}.zip" . )
-      - name: Upload packaged build
+      - name: Upload build file
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.filename }}-${{ needs.metadata.outputs.short_sha }}
-          path: packages/*.zip
+          path: packages/*
           if-no-files-found: error
           retention-days: 30
 
@@ -193,10 +205,12 @@ jobs:
           }
           mkdir -p packages
           cp "${apks[0]}" "packages/Abracadabra-Android-vc${CI_VERSION_CODE}-${GITHUB_SHA::7}.apk"
-      - uses: actions/upload-artifact@v4
+      # Upload raw APK as the artifact content; GitHub Actions downloads still arrive in an outer ZIP.
+      - name: Upload Android APK (no inner ZIP)
+        uses: actions/upload-artifact@v4
         with:
           name: Android-Debug-vc${{ steps.android_version.outputs.code }}-${{ needs.metadata.outputs.short_sha }}
-          path: packages/*.apk
+          path: packages/Abracadabra-Android-*.apk
           if-no-files-found: error
           retention-days: 30
 
