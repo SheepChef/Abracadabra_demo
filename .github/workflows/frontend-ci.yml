@@ -1,0 +1,370 @@
+# FINAL WORKFLOW, evolved directly from the validated ci-staging workflow.
+# Target repo: SheepChef/Abracadabra_demo; Cloudflare Pages project: abracadabra-demo.
+# GitHub Environment 'staging': CF_STAGING_API_TOKEN, CF_STAGING_ACCOUNT_ID.
+# GitHub Environment 'production': CF_PRODUCTION_API_TOKEN, CF_PRODUCTION_ACCOUNT_ID.
+# Preview deploys automatically from dev. Production deploys from main only after
+# repository variable ENABLE_PRODUCTION_DEPLOY has explicitly been set to 'true'.
+# First squash merge is build-only while the variable is missing/false.
+# NEVER change the Pages project, its custom-domain bindings, or any DNS settings.
+name: Frontend CI & Cloudflare Pages
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+
+  metadata:
+    name: Prepare build metadata
+    runs-on: ubuntu-24.04
+    outputs:
+      short_sha: ${{ steps.short_sha.outputs.value }}
+    steps:
+      - name: Resolve 7-character Git commit SHA
+        id: short_sha
+        run: echo "value=${GITHUB_SHA:0:7}" >> "$GITHUB_OUTPUT"
+
+  web:
+    needs: metadata
+    name: Build Web / PWA
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      # docs/ contains tracked legacy output; never deploy residual files from checkout.
+      - name: Clean previous web output
+        run: rm -rf docs
+      - run: npm run build
+      - name: Verify web output
+        run: |
+          test -s docs/index.html
+          test -s docs/manifest.webmanifest
+          test -s docs/sw.js
+      - name: Upload web build for deployment
+        uses: actions/upload-artifact@v4
+        with:
+          name: Web-${{ needs.metadata.outputs.short_sha }}
+          path: docs/
+          if-no-files-found: error
+          retention-days: 30
+
+  variants:
+    needs: metadata
+    name: Build ${{ matrix.label }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: Single File
+            command: build:singlefile
+            directory: dist-singlefile
+            filename: SingleFile
+          - label: Chrome Extension
+            command: build:chrome
+            directory: dist-chrome
+            filename: ChromeExt
+          - label: Firefox Extension
+            command: build:firefox
+            directory: dist-firefox
+            filename: FirefoxExt
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run ${{ matrix.command }}
+      - name: Verify output
+        env:
+          OUTPUT_DIR: ${{ matrix.directory }}
+          BUILD_COMMAND: ${{ matrix.command }}
+        run: |
+          if [ "$BUILD_COMMAND" = 'build:singlefile' ]; then
+            test -s "$OUTPUT_DIR/index.html"
+          else
+            test -s "$OUTPUT_DIR/manifest.json"
+          fi
+      - name: Collect standalone HTML (no inner ZIP)
+        if: matrix.command == 'build:singlefile'
+        run: |
+          mkdir -p packages
+          cp dist-singlefile/index.html "packages/Abracadabra-SingleFile-${GITHUB_SHA::7}.html"
+      - name: Package browser extension
+        if: matrix.command != 'build:singlefile'
+        env:
+          OUTPUT_DIR: ${{ matrix.directory }}
+          OUTPUT_NAME: ${{ matrix.filename }}
+        run: |
+          mkdir -p packages
+          ( cd "$OUTPUT_DIR" && zip -qr "${GITHUB_WORKSPACE}/packages/Abracadabra-${OUTPUT_NAME}-${GITHUB_SHA::7}.zip" . )
+      - name: Upload build file
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.filename }}-${{ needs.metadata.outputs.short_sha }}
+          path: packages/*
+          if-no-files-found: error
+          retention-days: 30
+
+  android:
+    needs: metadata
+    name: Build Android Debug APK
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.14.2'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools'
+      - name: Install Android SDK requirements
+        run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+      - name: Install JS dependencies
+        run: |
+          npm ci
+          npm ci --prefix Abracadabra-cordova
+      - name: Generate Cordova icon absent from git
+        run: |
+          python3 -m pip install --quiet Pillow
+          mkdir -p Abracadabra-cordova/res
+          python3 - <<'PY'
+          from PIL import Image
+          Image.open('favicon.webp').convert('RGBA').save('Abracadabra-cordova/res/favicon.png')
+          PY
+      - name: Build Android web assets
+        env:
+          BUILD_TARGET: android
+          NODE_OPTIONS: --max-old-space-size=4096
+        run: npx vite build
+      - name: Assign Android versionCode (do not modify versionName)
+        id: android_version
+        env:
+          VERSION_CODE_BASE: '200000'
+        run: |
+          set -euo pipefail
+          export CI_VERSION_CODE=$(( VERSION_CODE_BASE + GITHUB_RUN_NUMBER ))
+          python3 - <<'PYCODE'
+          from pathlib import Path
+          import os
+          import re
+          import xml.etree.ElementTree as ET
+
+          path = Path('Abracadabra-cordova/config.xml')
+          source = path.read_text(encoding='utf-8')
+          before = ET.fromstring(source)
+          code = os.environ['CI_VERSION_CODE']
+          if not (1 <= int(code) <= 2100000000):
+              raise SystemExit(f'Invalid Android versionCode: {code}')
+          updated, count = re.subn(
+              r'(android-versionCode=")\d+(")',
+              lambda m: m.group(1) + code + m.group(2),
+              source,
+          )
+          if count != 1:
+              raise SystemExit(f'Expected one android-versionCode attribute, got {count}')
+          after = ET.fromstring(updated)
+          if before.attrib['version'] != after.attrib['version']:
+              raise SystemExit('Unexpected versionName modification')
+          path.write_text(updated, encoding='utf-8')
+          print(f"Android versionName={after.attrib['version']}, versionCode={after.attrib['android-versionCode']}")
+          PYCODE
+          echo "code=$CI_VERSION_CODE" >> "$GITHUB_OUTPUT"
+      - name: Restore Android platform
+        working-directory: Abracadabra-cordova
+        run: npx --yes cordova@13.0.0 platform add android@15.0.0
+      - name: Build unsigned-for-release, debug-signed APK
+        working-directory: Abracadabra-cordova
+        run: npx --yes cordova@13.0.0 build android --debug -- --packageType=apk
+      - name: Verify versionCode and collect Android APK
+        env:
+          CI_VERSION_CODE: ${{ steps.android_version.outputs.code }}
+        run: |
+          set -euo pipefail
+          mapfile -t apks < <(find Abracadabra-cordova/platforms/android/app/build/outputs/apk -type f -name '*-debug.apk')
+          if [ "${#apks[@]}" -ne 1 ]; then
+            echo "Expected 1 Debug APK, found ${#apks[@]}" >&2
+            exit 1
+          fi
+          apk_info=$("$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging "${apks[0]}" | grep '^package:')
+          echo "$apk_info"
+          [[ "$apk_info" == *"versionCode='$CI_VERSION_CODE'"* ]] || {
+            echo "Built APK versionCode does not match $CI_VERSION_CODE" >&2
+            exit 1
+          }
+          mkdir -p packages
+          cp "${apks[0]}" "packages/Abracadabra-Android-vc${CI_VERSION_CODE}-${GITHUB_SHA::7}.apk"
+      # Upload raw APK as the artifact content; GitHub Actions downloads still arrive in an outer ZIP.
+      - name: Upload Android APK (no inner ZIP)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Android-Debug-vc${{ steps.android_version.outputs.code }}-${{ needs.metadata.outputs.short_sha }}
+          path: packages/Abracadabra-Android-*.apk
+          if-no-files-found: error
+          retention-days: 30
+
+  deploy_preview:
+    name: Publish dev to Cloudflare Pages PREVIEW
+    needs: [metadata, web]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-24.04
+    environment: staging
+    concurrency:
+      group: abracadabra-pages-dev-preview
+      cancel-in-progress: true
+    steps:
+      - name: Download exact Web artifact into an empty directory
+        uses: actions/download-artifact@v4
+        with:
+          name: Web-${{ needs.metadata.outputs.short_sha }}
+          path: ${{ runner.temp }}/abracadabra-pages-assets
+      - name: Verify built site assets
+        working-directory: ${{ runner.temp }}/abracadabra-pages-assets
+        run: |
+          set -euo pipefail
+          test -s index.html
+          test -s manifest.webmanifest
+          test -s sw.js
+          test -s _headers
+          test -s favicon.webp
+      - name: Confirm Pages project and production branch without changing settings
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_STAGING_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_STAGING_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            -o "$RUNNER_TEMP/pages-project.json" \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/abracadabra-demo"
+          jq -e '.success == true and .result.name == "abracadabra-demo" and .result.production_branch == "main"' \
+            "$RUNNER_TEMP/pages-project.json" > /dev/null
+          # Fail closed if either established production custom-domain binding is absent.
+          jq -e '(.result.domains | index("abra.js.org") != null) and (.result.domains | index("abra.halu.ca") != null)' \
+            "$RUNNER_TEMP/pages-project.json" > /dev/null
+          echo "Verified existing Pages project, production branch, and custom-domain bindings"
+      - name: Skip deployment if this commit has been superseded
+        id: freshness
+        env:
+          EXPECTED_BRANCH: dev
+        run: |
+          set -euo pipefail
+          LATEST_SHA="$(git ls-remote "https://github.com/${GITHUB_REPOSITORY}.git" "refs/heads/${EXPECTED_BRANCH}" | cut -f1)"
+          test -n "$LATEST_SHA"
+          if [ "$LATEST_SHA" = "$GITHUB_SHA" ]; then
+            echo 'publish=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'publish=false' >> "$GITHUB_OUTPUT"
+            echo "Skipping superseded commit: $GITHUB_SHA"
+          fi
+      - name: Deploy prebuilt files to dev branch of EXISTING Pages project
+        if: steps.freshness.outputs.publish == 'true'
+        working-directory: ${{ runner.temp }}/abracadabra-pages-assets
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_STAGING_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_STAGING_ACCOUNT_ID }}
+          WRANGLER_CACHE_DIR: ${{ runner.temp }}/wrangler-cache-dev
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 pages deploy . \
+            --project-name=abracadabra-demo \
+            --branch=dev \
+            --commit-hash="$GITHUB_SHA"
+
+  deploy_production:
+    name: Publish main to Cloudflare Pages PRODUCTION (opt-in)
+    needs: [metadata, web]
+    if: >-
+      vars.ENABLE_PRODUCTION_DEPLOY == 'true' &&
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-24.04
+    environment: production
+    concurrency:
+      group: abracadabra-pages-main-production
+      cancel-in-progress: false
+    steps:
+      - name: Download exact Web artifact into an empty directory
+        uses: actions/download-artifact@v4
+        with:
+          name: Web-${{ needs.metadata.outputs.short_sha }}
+          path: ${{ runner.temp }}/abracadabra-pages-assets
+      - name: Verify built site assets
+        working-directory: ${{ runner.temp }}/abracadabra-pages-assets
+        run: |
+          set -euo pipefail
+          test -s index.html
+          test -s manifest.webmanifest
+          test -s sw.js
+          test -s _headers
+          test -s favicon.webp
+      - name: Confirm Pages project and production branch without changing settings
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_PRODUCTION_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_PRODUCTION_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            -o "$RUNNER_TEMP/pages-project.json" \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/abracadabra-demo"
+          jq -e '.success == true and .result.name == "abracadabra-demo" and .result.production_branch == "main"' \
+            "$RUNNER_TEMP/pages-project.json" > /dev/null
+          # Fail closed if either established production custom-domain binding is absent.
+          jq -e '(.result.domains | index("abra.js.org") != null) and (.result.domains | index("abra.halu.ca") != null)' \
+            "$RUNNER_TEMP/pages-project.json" > /dev/null
+          echo "Verified existing Pages project, production branch, and custom-domain bindings"
+      - name: Skip deployment if this commit has been superseded
+        id: freshness
+        env:
+          EXPECTED_BRANCH: main
+        run: |
+          set -euo pipefail
+          LATEST_SHA="$(git ls-remote "https://github.com/${GITHUB_REPOSITORY}.git" "refs/heads/${EXPECTED_BRANCH}" | cut -f1)"
+          test -n "$LATEST_SHA"
+          if [ "$LATEST_SHA" = "$GITHUB_SHA" ]; then
+            echo 'publish=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'publish=false' >> "$GITHUB_OUTPUT"
+            echo "Skipping superseded commit: $GITHUB_SHA"
+          fi
+      - name: Deploy prebuilt files to main branch of EXISTING Pages project
+        if: steps.freshness.outputs.publish == 'true'
+        working-directory: ${{ runner.temp }}/abracadabra-pages-assets
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_PRODUCTION_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_PRODUCTION_ACCOUNT_ID }}
+          WRANGLER_CACHE_DIR: ${{ runner.temp }}/wrangler-cache-main
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 pages deploy . \
+            --project-name=abracadabra-demo \
+            --branch=main \
+            --commit-hash="$GITHUB_SHA"
