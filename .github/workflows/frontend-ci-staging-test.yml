@@ -1,0 +1,185 @@
+# TEST-ONLY: save as .github/workflows/frontend-ci-staging.yml on branch ci-staging.
+# No production job or production credentials are referenced.
+# Deploy stays skipped until repository variable ENABLE_STAGING_DEPLOY is set to 'true'.
+# Create a GitHub environment 'staging' restricted to ci-staging,
+# with environment secrets CF_STAGING_API_TOKEN and CF_STAGING_ACCOUNT_ID.
+# Create a separate Cloudflare Pages project named abracadabra-ci-staging.
+name: Frontend CI (Staging only)
+
+on:
+  push:
+    branches:
+      - ci-staging
+
+permissions:
+  contents: read
+
+jobs:
+  web:
+    name: Build Web / PWA
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Verify web output
+        run: |
+          test -s docs/index.html
+          test -s docs/manifest.webmanifest
+          test -s docs/sw.js
+      - name: Create downloadable ZIP
+        run: |
+          mkdir -p packages
+          ( cd docs && zip -qr "${GITHUB_WORKSPACE}/packages/Abracadabra-Web-${GITHUB_SHA::7}.zip" . )
+      - name: Upload web build for deployment
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-dist-${{ github.sha }}
+          path: docs/
+          if-no-files-found: error
+          retention-days: 30
+      - name: Upload web ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-zip-${{ github.sha }}
+          path: packages/*.zip
+          if-no-files-found: error
+          retention-days: 30
+
+  variants:
+    name: Build ${{ matrix.label }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: Single File
+            command: build:singlefile
+            directory: dist-singlefile
+            filename: SingleFile
+          - label: Chrome Extension
+            command: build:chrome
+            directory: dist-chrome
+            filename: Chrome
+          - label: Firefox Extension
+            command: build:firefox
+            directory: dist-firefox
+            filename: Firefox
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run ${{ matrix.command }}
+      - name: Verify output
+        env:
+          OUTPUT_DIR: ${{ matrix.directory }}
+        run: test -d "$OUTPUT_DIR" && test -n "$(find "$OUTPUT_DIR" -type f -print -quit)"
+      - name: Package output (root-level extension manifest)
+        env:
+          OUTPUT_DIR: ${{ matrix.directory }}
+          OUTPUT_NAME: ${{ matrix.filename }}
+        run: |
+          mkdir -p packages
+          ( cd "$OUTPUT_DIR" && zip -qr "${GITHUB_WORKSPACE}/packages/Abracadabra-${OUTPUT_NAME}-${GITHUB_SHA::7}.zip" . )
+      - name: Upload packaged build
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.filename }}-${{ github.sha }}
+          path: packages/*.zip
+          if-no-files-found: error
+          retention-days: 30
+
+  android:
+    name: Build Android Debug APK
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.14.2'
+      - uses: android-actions/setup-android@v3
+      - name: Install Android SDK requirements
+        run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+      - name: Install JS dependencies
+        run: |
+          npm ci
+          npm ci --prefix Abracadabra-cordova
+      - name: Generate Cordova icon absent from git
+        run: |
+          python3 -m pip install --quiet Pillow
+          mkdir -p Abracadabra-cordova/res
+          python3 - <<'PY'
+          from PIL import Image
+          Image.open('favicon.webp').convert('RGBA').save('Abracadabra-cordova/res/favicon.png')
+          PY
+      - name: Build Android web assets
+        env:
+          BUILD_TARGET: android
+          NODE_OPTIONS: --max-old-space-size=4096
+        run: npx vite build
+      - name: Restore Android platform
+        working-directory: Abracadabra-cordova
+        run: npx --yes cordova@13.0.0 platform add android@15.0.0
+      - name: Build unsigned-for-release, debug-signed APK
+        working-directory: Abracadabra-cordova
+        run: npx --yes cordova@13.0.0 build android --debug -- --packageType=apk
+      - name: Collect Android APK
+        run: |
+          mkdir -p packages
+          find Abracadabra-cordova/platforms/android/app/build/outputs/apk -type f -name '*.apk' -exec cp {} "packages/Abracadabra-Android-${GITHUB_SHA::7}.apk" \;
+          test -s "packages/Abracadabra-Android-${GITHUB_SHA::7}.apk"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Android-Debug-${{ github.sha }}
+          path: packages/*.apk
+          if-no-files-found: error
+          retention-days: 30
+
+  staging_deploy:
+    name: Deploy to separate staging Pages project (opt-in)
+    needs: web
+    if: github.event_name == 'push' && github.ref == 'refs/heads/ci-staging' && vars.ENABLE_STAGING_DEPLOY == 'true'
+    runs-on: ubuntu-24.04
+    environment: staging
+    concurrency:
+      group: abracadabra-pages-staging
+      cancel-in-progress: true
+    steps:
+      - name: Download the exact Web artifact into an empty directory
+        uses: actions/download-artifact@v4
+        with:
+          name: web-dist-${{ github.sha }}
+          path: ${{ runner.temp }}/abracadabra-staging-assets
+      - name: Verify staged assets
+        working-directory: ${{ runner.temp }}/abracadabra-staging-assets
+        run: |
+          test -s index.html
+          test -s manifest.webmanifest
+          test -s sw.js
+      - name: Deploy to explicitly named STAGING project ONLY
+        working-directory: ${{ runner.temp }}/abracadabra-staging-assets
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_STAGING_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_STAGING_ACCOUNT_ID }}
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          npx --yes wrangler@4 pages deploy . \
+            --project-name=abracadabra-ci-staging \
+            --branch=ci-staging \
+            --commit-hash="$GITHUB_SHA"
