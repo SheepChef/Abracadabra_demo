@@ -1,4 +1,4 @@
-# TEST-ONLY: save as .github/workflows/frontend-ci-staging.yml on branch ci-staging.
+# TEST-ONLY: save as .github/workflows/frontend-ci-staging-test.yml on branch ci-staging.
 # No production job or production credentials are referenced.
 # Deploy stays skipped until repository variable ENABLE_STAGING_DEPLOY is set to 'true'.
 # Create a GitHub environment 'staging' restricted to ci-staging,
@@ -15,7 +15,18 @@ permissions:
   contents: read
 
 jobs:
+  metadata:
+    name: Prepare build metadata
+    runs-on: ubuntu-24.04
+    outputs:
+      short_sha: ${{ steps.short_sha.outputs.value }}
+    steps:
+      - name: Resolve 7-character Git commit SHA
+        id: short_sha
+        run: echo "value=${GITHUB_SHA:0:7}" >> "$GITHUB_OUTPUT"
+
   web:
+    needs: metadata
     name: Build Web / PWA
     runs-on: ubuntu-24.04
     steps:
@@ -31,26 +42,16 @@ jobs:
           test -s docs/index.html
           test -s docs/manifest.webmanifest
           test -s docs/sw.js
-      - name: Create downloadable ZIP
-        run: |
-          mkdir -p packages
-          ( cd docs && zip -qr "${GITHUB_WORKSPACE}/packages/Abracadabra-Web-${GITHUB_SHA::7}.zip" . )
       - name: Upload web build for deployment
         uses: actions/upload-artifact@v4
         with:
-          name: web-dist-${{ github.sha }}
+          name: Web-${{ needs.metadata.outputs.short_sha }}
           path: docs/
-          if-no-files-found: error
-          retention-days: 30
-      - name: Upload web ZIP
-        uses: actions/upload-artifact@v4
-        with:
-          name: web-zip-${{ github.sha }}
-          path: packages/*.zip
           if-no-files-found: error
           retention-days: 30
 
   variants:
+    needs: metadata
     name: Build ${{ matrix.label }}
     runs-on: ubuntu-24.04
     strategy:
@@ -91,12 +92,13 @@ jobs:
       - name: Upload packaged build
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.filename }}-${{ github.sha }}
+          name: ${{ matrix.filename }}-${{ needs.metadata.outputs.short_sha }}
           path: packages/*.zip
           if-no-files-found: error
           retention-days: 30
 
   android:
+    needs: metadata
     name: Build Android Debug APK
     runs-on: ubuntu-24.04
     steps:
@@ -134,27 +136,73 @@ jobs:
           BUILD_TARGET: android
           NODE_OPTIONS: --max-old-space-size=4096
         run: npx vite build
+      - name: Assign Android versionCode (do not modify versionName)
+        id: android_version
+        env:
+          VERSION_CODE_BASE: '100000'
+        run: |
+          set -euo pipefail
+          export CI_VERSION_CODE=$(( VERSION_CODE_BASE + GITHUB_RUN_NUMBER ))
+          python3 - <<'PYCODE'
+          from pathlib import Path
+          import os
+          import re
+          import xml.etree.ElementTree as ET
+
+          path = Path('Abracadabra-cordova/config.xml')
+          source = path.read_text(encoding='utf-8')
+          before = ET.fromstring(source)
+          code = os.environ['CI_VERSION_CODE']
+          if not (1 <= int(code) <= 2100000000):
+              raise SystemExit(f'Invalid Android versionCode: {code}')
+          updated, count = re.subn(
+              r'(android-versionCode=")\d+(")',
+              lambda m: m.group(1) + code + m.group(2),
+              source,
+          )
+          if count != 1:
+              raise SystemExit(f'Expected one android-versionCode attribute, got {count}')
+          after = ET.fromstring(updated)
+          if before.attrib['version'] != after.attrib['version']:
+              raise SystemExit('Unexpected versionName modification')
+          path.write_text(updated, encoding='utf-8')
+          print(f"Android versionName={after.attrib['version']}, versionCode={after.attrib['android-versionCode']}")
+          PYCODE
+          echo "code=$CI_VERSION_CODE" >> "$GITHUB_OUTPUT"
       - name: Restore Android platform
         working-directory: Abracadabra-cordova
         run: npx --yes cordova@13.0.0 platform add android@15.0.0
       - name: Build unsigned-for-release, debug-signed APK
         working-directory: Abracadabra-cordova
         run: npx --yes cordova@13.0.0 build android --debug -- --packageType=apk
-      - name: Collect Android APK
+      - name: Verify versionCode and collect Android APK
+        env:
+          CI_VERSION_CODE: ${{ steps.android_version.outputs.code }}
         run: |
+          set -euo pipefail
+          mapfile -t apks < <(find Abracadabra-cordova/platforms/android/app/build/outputs/apk -type f -name '*-debug.apk')
+          if [ "${#apks[@]}" -ne 1 ]; then
+            echo "Expected 1 Debug APK, found ${#apks[@]}" >&2
+            exit 1
+          fi
+          apk_info=$("$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging "${apks[0]}" | grep '^package:')
+          echo "$apk_info"
+          [[ "$apk_info" == *"versionCode='$CI_VERSION_CODE'"* ]] || {
+            echo "Built APK versionCode does not match $CI_VERSION_CODE" >&2
+            exit 1
+          }
           mkdir -p packages
-          find Abracadabra-cordova/platforms/android/app/build/outputs/apk -type f -name '*.apk' -exec cp {} "packages/Abracadabra-Android-${GITHUB_SHA::7}.apk" \;
-          test -s "packages/Abracadabra-Android-${GITHUB_SHA::7}.apk"
+          cp "${apks[0]}" "packages/Abracadabra-Android-vc${CI_VERSION_CODE}-${GITHUB_SHA::7}.apk"
       - uses: actions/upload-artifact@v4
         with:
-          name: Android-Debug-${{ github.sha }}
+          name: Android-Debug-vc${{ steps.android_version.outputs.code }}-${{ needs.metadata.outputs.short_sha }}
           path: packages/*.apk
           if-no-files-found: error
           retention-days: 30
 
   staging_deploy:
     name: Deploy to separate staging Pages project (opt-in)
-    needs: web
+    needs: [metadata, web]
     if: github.event_name == 'push' && github.ref == 'refs/heads/ci-staging' && vars.ENABLE_STAGING_DEPLOY == 'true'
     runs-on: ubuntu-24.04
     environment: staging
@@ -165,7 +213,7 @@ jobs:
       - name: Download the exact Web artifact into an empty directory
         uses: actions/download-artifact@v4
         with:
-          name: web-dist-${{ github.sha }}
+          name: Web-${{ needs.metadata.outputs.short_sha }}
           path: ${{ runner.temp }}/abracadabra-staging-assets
       - name: Verify staged assets
         working-directory: ${{ runner.temp }}/abracadabra-staging-assets
