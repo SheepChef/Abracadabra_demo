@@ -59,25 +59,34 @@
 > 请查阅 [**前端编译和部署**](https://abracadabra.js.org/document/frontend-deploy.html) 一节，了解编译步骤。
 >
 
-### 静态页面
+### 静态页面 / 前端源码
 
-本项目有自动托管在Cloudflare Pages的静态页面可供直接使用。
+本项目提供自动托管于 Cloudflare Pages 的静态页面，可供直接使用。
 
-如果你想自行快速部署这个静态页，可以在Release中下载快速部署文件包。
+如果你想自行快速部署这个静态页面，可以在 Release 中下载快速部署文件包。若要自行编译或修改，请前往前端源代码仓库。
+
+如果你不想自行配置部署环境，可以使用下方的一键部署方案。
 
 [<img src="https://img.shields.io/badge/静态页面-ffd91c?logo=cloudflarepages&style=for-the-badge&logoColor=000000" width="130"/>](https://abra.js.org/)
+[<img src="https://img.shields.io/badge/前端源码-9a10b5?style=for-the-badge" width="103" />](https://github.com/SheepChef/Abracadabra_demo)
 
-### 一键部署前端
+### 一键部署
 
-你也可以将魔曰前端一键部署至自己的容器。
+你可以将魔曰前端一键部署至自己的托管平台账户。
 
-魔曰支持一键部署至 Vercel, Cloudflare 和 Netlify，直接点击下方按钮就可立刻部署。
+魔曰支持通过 **Cloudflare Workers**、**Netlify** 和 **Vercel** 进行一键部署。点击下方按钮，按照对应平台的提示即可完成部署。
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FSheepChef%2FAbracadabra_demo)
-
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/SheepChef/Abracadabra_demo)
-
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/SheepChef/Abracadabra_demo)
+<p align="left">
+  <a href="https://deploy.workers.cloudflare.com/?url=https://github.com/SheepChef/Abracadabra_demo">
+    <img src="https://deploy.workers.cloudflare.com/button" alt="Deploy to Cloudflare Workers" height="36" />
+  </a>
+  <a href="https://app.netlify.com/start/deploy?repository=https://github.com/SheepChef/Abracadabra_demo">
+    <img src="https://www.netlify.com/img/deploy/button.svg" alt="Deploy to Netlify" height="36" />
+  </a>
+  <a href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FSheepChef%2FAbracadabra_demo">
+    <img src="https://vercel.com/button" alt="Deploy with Vercel" height="36" />
+  </a>
+</p>
 
 > 部署本项目时请遵守 [AIPL 1.2 许可证](LICENSE.md)。
 
