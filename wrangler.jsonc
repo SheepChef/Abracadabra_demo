@@ -1,0 +1,9 @@
+{
+  "$schema": "https://unpkg.com/wrangler@4/config-schema.json",
+  "name": "abracadabra-selfhost",
+  "compatibility_date": "2026-10-15",
+  "assets": {
+    "directory": "./docs",
+    "not_found_handling": "single-page-application"
+  }
+}

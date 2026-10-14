@@ -1,0 +1,8 @@
+# File location: SheepChef/Abracadabra_demo/netlify.toml
+# The web/PWA output directory is docs/, NOT Vite's default dist/.
+[build]
+  command = "npm run build"
+  publish = "docs"
+
+[build.environment]
+  NODE_VERSION = "22"
