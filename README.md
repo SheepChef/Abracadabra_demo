@@ -67,6 +67,20 @@
 
 [<img src="https://img.shields.io/badge/静态页面-ffd91c?logo=cloudflarepages&style=for-the-badge&logoColor=000000" width="130"/>](https://abra.js.org/)
 
+### 一键部署前端
+
+你也可以将魔曰前端一键部署至自己的容器。
+
+魔曰支持一键部署至 Vercel, Cloudflare 和 Netlify，直接点击下方按钮就可立刻部署。
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FSheepChef%2FAbracadabra_demo)
+
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/SheepChef/Abracadabra_demo)
+
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/SheepChef/Abracadabra_demo)
+
+> 部署本项目时请遵守 [AIPL 1.2 许可证](LICENSE.md)。
+
 ### 浏览器插件
 
 浏览器插件基于本项目的 JavaScript 实现。

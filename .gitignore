@@ -35,3 +35,4 @@ vscode
 .prettierignore
 .prettierrc.json
 dev-dist
+docs

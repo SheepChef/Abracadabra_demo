@@ -15,7 +15,8 @@
     "preview": "vite preview",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
     "format": "prettier --write src/",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "deploy": "npx --yes wrangler@4 deploy"
   },
   "dependencies": {
     "@fontsource/roboto": "^5.2.10",
