@@ -36,3 +36,4 @@ vscode
 .prettierrc.json
 dev-dist
 docs
+CODE_STRUCTURE.md

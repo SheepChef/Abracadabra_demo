@@ -433,6 +433,167 @@ body {
   color: var(--md-sys-color-on-surface-variant);
 }
 
+/* ── Dilution & Geek Mode Extensions ── */
+.config-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dilution-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 8px 0 4px;
+}
+
+.dilution-sub-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.dilution-control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dilution-control-label {
+  font-size: 0.85rem;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.compact-segmented {
+  width: 100%;
+  text-align: center;
+  --m3e-segmented-button-height: 36px;
+  --m3e-segmented-button-padding-start: 6px;
+  --m3e-segmented-button-padding-end: 6px;
+  --m3e-segmented-button-font-size: 0.82rem;
+  --m3e-segmented-button-tracking: 0;
+}
+
+.compact-segmented m3e-button-segment {
+  flex: 1 1 0;
+  min-width: 0;
+  text-align: center;
+}
+
+.corpus-summary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0 2px;
+}
+
+.corpus-summary-row m3e-button {
+  flex-shrink: 0;
+}
+
+.corpus-summary-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.corpus-summary-title {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+}
+
+.corpus-summary-sub {
+  font-size: 0.78rem;
+  color: var(--md-sys-color-on-surface-variant);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.geek-setting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 6px 0;
+}
+
+.geek-setting-row m3e-switch {
+  flex-shrink: 0;
+}
+
+.geek-setting-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.geek-setting-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+}
+
+.geek-setting-desc {
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+#CustomCorpusDialog,
+#GeekDialog {
+  --m3e-dialog-min-width: min(420px, calc(100vw - 32px));
+}
+
+.corpus-slot-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.corpus-slot-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--md-sys-color-surface-container-low);
+  border: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.corpus-slot-row m3e-button {
+  flex-shrink: 0;
+}
+
+.corpus-slot-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.corpus-slot-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+}
+
+.corpus-slot-files {
+  font-size: 0.78rem;
+  color: var(--md-sys-color-on-surface-variant);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* ── Custom Tabs ── */
 .custom-tabs {
   display: flex;
@@ -482,6 +643,47 @@ body {
   min-height: 100px;
   box-sizing: border-box;
   line-break: anywhere;
+}
+
+/* 载荷字高亮镜像层（仅加密文本启用时存在；未启用时不改变原生 textarea 任何样式） */
+.multiline-input .output-highlight-mirror {
+  position: absolute;
+  inset: 0;
+  margin-block: calc(var(--m3e-form-field-label-line-height, var(--md-sys-typescale-body-small-line-height, 16px)) / 2);
+  padding: 0;
+  border: 0;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  letter-spacing: inherit;
+  white-space: normal;
+  line-break: anywhere;
+  text-align: start;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+}
+
+.multiline-input textarea.payload-hl-textarea {
+  position: relative;
+  z-index: 1;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  caret-color: var(--md-sys-color-on-surface);
+  background-color: transparent;
+  scrollbar-width: none;
+}
+
+.multiline-input textarea.payload-hl-textarea::-webkit-scrollbar {
+  display: none;
+}
+
+.multiline-input textarea.payload-hl-textarea::selection {
+  background-color: color-mix(in srgb, var(--md-sys-color-primary) 28%, transparent);
+  color: transparent;
+  -webkit-text-fill-color: transparent;
 }
 
 .slider-row {
@@ -549,6 +751,10 @@ body {
   background: var(--md-sys-color-surface-container);
   padding: 8px;
   border-radius: 8px;
+}
+
+.segment-content.has-highlight {
+  white-space: normal;
 }
 
 /* ── Hint/Error/Warning Cards ── */
