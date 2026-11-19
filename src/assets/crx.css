@@ -3,7 +3,7 @@
 /* Fixed Popup Dimensions & Reset */
 body.crx-popup {
   width: 760px;
-  height: 580px;
+  height: 600px;
   margin: 0;
   overflow: hidden;
 }
