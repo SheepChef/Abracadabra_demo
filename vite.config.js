@@ -52,8 +52,9 @@ if (buildTarget === 'firefox-ext') {
       strict_min_version: "109.0"
     }
   };
-} else {
+} else if (buildTarget === 'chrome-ext'){
   delete manifest.browser_specific_settings;
+  manifest.action.default_popup = "popup-shell.html"
 }
 
 function generateSourceHash() {
@@ -129,7 +130,12 @@ export default defineConfig({
             return "deps";
           }
         }
-      }
+      },
+      ...(buildTarget === 'chrome-ext' ? {
+        input: {
+          'index': resolve(projectRoot,"index.html")
+        }
+      } : [])
     }
   },
   plugins: [
@@ -152,6 +158,17 @@ export default defineConfig({
           rmSync(resolve('dist-firefox/_headers'), {
             force: true,
           });
+        }
+      },
+    ] : []),
+    ...(buildTarget === 'chrome-ext' ? [
+      {
+        name: 'copy-popup-shell',
+        closeBundle() {
+          fs.copyFileSync(
+            path.resolve(__dirname, 'popup-shell.html'),
+            path.resolve(__dirname, 'dist-chrome/popup-shell.html')
+          )
         }
       }
     ] : []),
